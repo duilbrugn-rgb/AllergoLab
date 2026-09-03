@@ -43,3 +43,10 @@ App web "AllergoLab" per selezionare allergeni e creare un promemoria/report da 
 - [x] Endpoint /api/admin/allergens protetti da get_admin_user (403 per non-admin).
 - [x] Confermato isolamento report per utente (ownership su user_id: list/get/delete). Ogni utente vede solo i propri report/storico.
 - [x] Testing agent: 100% (backend 13/13, frontend).
+
+
+## Aggiornamento (2026-06 · iterazione 5)
+- [x] Registro modifiche (audit) allergeni: ogni create/update/delete registra in db.allergen_audit action, allergene, autore (nome+email) e timestamp; per gli update elenca i campi modificati. Endpoint GET /api/admin/audit (admin-only).
+- [x] Gestione ruoli: GET /api/admin/users e PUT /api/admin/users/{id}/role (admin-only). L'admin promuove/rimuove admin; blocco self-role (400), ruolo invalido (400), utente inesistente (404).
+- [x] UI: tab "Configurazione" con sotto-tab Catalogo / Utenti / Registro modifiche; stati di caricamento.
+- [x] Testing agent: 100% (backend 41/41, frontend).

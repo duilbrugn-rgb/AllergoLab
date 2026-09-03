@@ -7,6 +7,8 @@ import DualList from "../components/DualList";
 import SissSummary from "../components/SissSummary";
 import ReportModal from "../components/ReportModal";
 import AdminAllergens from "../components/AdminAllergens";
+import AdminUsers from "../components/AdminUsers";
+import AuditLog from "../components/AuditLog";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
@@ -159,7 +161,22 @@ export default function AppPage() {
 
           {user?.role === "admin" && (
             <TabsContent value="config">
-              <AdminAllergens allergens={allergens} onChanged={loadAllergens} />
+              <Tabs defaultValue="catalogo" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="catalogo" data-testid="subtab-catalogo">Catalogo</TabsTrigger>
+                  <TabsTrigger value="utenti" data-testid="subtab-utenti">Utenti</TabsTrigger>
+                  <TabsTrigger value="registro" data-testid="subtab-registro">Registro modifiche</TabsTrigger>
+                </TabsList>
+                <TabsContent value="catalogo">
+                  <AdminAllergens allergens={allergens} onChanged={loadAllergens} />
+                </TabsContent>
+                <TabsContent value="utenti">
+                  <AdminUsers currentUser={user} />
+                </TabsContent>
+                <TabsContent value="registro">
+                  <AuditLog />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           )}
         </Tabs>

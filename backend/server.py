@@ -46,6 +46,21 @@ async def fetch_allergens_by_codes(codes):
     by_code = {d["code"]: d for d in docs}
     return [by_code[c] for c in codes if c in by_code]
 
+
+async def log_allergen_change(action: str, allergen: dict, user: dict, details: str = ""):
+    """Traccia chi/quando ha creato, modificato o eliminato un allergene."""
+    await db.allergen_audit.insert_one({
+        "action": action,  # create | update | delete
+        "allergen_code": allergen.get("code"),
+        "allergen_name": allergen.get("name"),
+        "allergen_type": allergen.get("type"),
+        "changed_by_id": user.get("user_id"),
+        "changed_by_name": user.get("name") or user.get("email"),
+        "changed_by_email": user.get("email"),
+        "details": details,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("allergolab")
 
@@ -187,6 +202,10 @@ class AllergenInput(BaseModel):
     type: str
     siss_code: str = Field(min_length=1)
     siss_description: str = ""
+
+
+class RoleUpdate(BaseModel):
+    role: str
 
 
 # --- Auth endpoints ---
@@ -387,8 +406,8 @@ async def admin_create_allergen(data: AllergenInput, user: dict = Depends(get_ad
         raise HTTPException(status_code=400, detail="Codice già esistente")
     doc = data.model_dump()
     doc["code"] = code
-    await db.allergens.insert_one(doc)
-    doc.pop("_id", None)
+    await db.allergens.insert_one(dict(doc))
+    await log_allergen_change("create", doc, user, "Nuovo allergene aggiunto")
     return doc
 
 
@@ -396,7 +415,7 @@ async def admin_create_allergen(data: AllergenInput, user: dict = Depends(get_ad
 async def admin_update_allergen(code: str, data: AllergenInput, user: dict = Depends(get_admin_user)):
     if data.type not in ALLERGEN_TYPES:
         raise HTTPException(status_code=400, detail="Tipologia non valida")
-    existing = await db.allergens.find_one({"code": code})
+    existing = await db.allergens.find_one({"code": code}, {"_id": 0})
     if not existing:
         raise HTTPException(status_code=404, detail="Allergene non trovato")
     new_code = data.code.strip()
@@ -405,16 +424,56 @@ async def admin_update_allergen(code: str, data: AllergenInput, user: dict = Dep
     doc = data.model_dump()
     doc["code"] = new_code
     await db.allergens.update_one({"code": code}, {"$set": doc})
-    doc.pop("_id", None)
+    changes = [f"{f}: '{existing.get(f)}' → '{doc.get(f)}'"
+               for f in ("code", "name", "type", "siss_code", "siss_description")
+               if existing.get(f) != doc.get(f)]
+    await log_allergen_change("update", doc, user,
+                              "; ".join(changes) if changes else "Nessuna modifica di campo")
     return doc
 
 
 @api_router.delete("/admin/allergens/{code}")
 async def admin_delete_allergen(code: str, user: dict = Depends(get_admin_user)):
-    res = await db.allergens.delete_one({"code": code})
-    if res.deleted_count == 0:
+    existing = await db.allergens.find_one({"code": code}, {"_id": 0})
+    if not existing:
         raise HTTPException(status_code=404, detail="Allergene non trovato")
+    await db.allergens.delete_one({"code": code})
+    await log_allergen_change("delete", existing, user, "Allergene eliminato")
     return {"ok": True}
+
+
+# --- Admin: registro modifiche (audit) ---
+@api_router.get("/admin/audit")
+async def admin_audit(user: dict = Depends(get_admin_user)):
+    return await db.allergen_audit.find({}, {"_id": 0}).sort("timestamp", -1).to_list(300)
+
+
+# --- Admin: gestione utenti e ruoli ---
+@api_router.get("/admin/users")
+async def admin_list_users(user: dict = Depends(get_admin_user)):
+    docs = await db.users.find({}, {"_id": 0, "password_hash": 0}).sort("created_at", 1).to_list(1000)
+    return [{
+        "user_id": d["user_id"],
+        "email": d["email"],
+        "name": d.get("name", ""),
+        "role": d.get("role", "user"),
+        "auth_provider": d.get("auth_provider", "password"),
+        "created_at": d.get("created_at"),
+    } for d in docs]
+
+
+@api_router.put("/admin/users/{user_id}/role")
+async def admin_update_role(user_id: str, data: RoleUpdate, user: dict = Depends(get_admin_user)):
+    if data.role not in ("admin", "user"):
+        raise HTTPException(status_code=400, detail="Ruolo non valido")
+    if user_id == user["user_id"]:
+        raise HTTPException(status_code=400, detail="Non puoi modificare il tuo stesso ruolo")
+    target = await db.users.find_one({"user_id": user_id})
+    if not target:
+        raise HTTPException(status_code=404, detail="Utente non trovato")
+    await db.users.update_one({"user_id": user_id}, {"$set": {"role": data.role}})
+    target["role"] = data.role
+    return public_user(target)
 
 
 @api_router.get("/")

@@ -1,0 +1,25 @@
+{
+  "summary": "Tested new features 'Registro modifiche' (audit trail) and 'Gestione utenti/ruoli'. Backend: 41/41 pytest passed (27 previous + 14 new in test_audit_and_users.py covering RBAC 401/403 on /api/admin/audit, /api/admin/users, /api/admin/users/{id}/role; create/update/delete audit logging with correct fields incl. details listing changed fields on update; self-role 400, invalid-role 400, missing-user 404, promote->target can access admin endpoints, demote->403 restored). Frontend: admin login, subtab-catalogo CRUD on zTEST allergen, subtab-registro shows 15 audit entries (create/update/delete captured with actor and timestamp), subtab-utenti lists 25 users with role badges, own row shows 'tu' with no buttons, promote/demote flow updates badge Operatore<->Admin. Regression: non-admin operator has no tab-config visible; Nuovo Report/Storico tabs still functional.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_audit_and_users.py",
+    "/app/backend/tests/test_admin_and_isolation.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/full.xml",
+    "/app/test_reports/pytest/audit_users.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "AuditLog/AdminUsers Badge count text-testid resolves before async fetch completes on subtab click (renders as 0 momentarily). Not a bug, but tests must wait for the row/entry testid rather than reading the count immediately. Optional UX: show a small loading spinner while entries.length === 0 and fetch is inflight, to distinguish 'no data' from 'loading'.",
+    "log_allergen_change stores changed_by_email/name/timestamp/details correctly; consider indexing db.allergen_audit.timestamp desc for scale (currently .to_list(300) fine).",
+    "admin_list_users properly strips _id and password_hash; sort by created_at ascending is intentional (admin appears first)."
+  ],
+  "updated_files": ["/app/backend/tests/test_audit_and_users.py"],
+  "success_rate": {"backend": "100% (41/41)", "frontend": "100% (all new + regression flows)"},
+  "test_credentials": "duilbrugn@gmail.com / AllergoLab2026! (from /app/memory/test_credentials.md); operator users created ad-hoc and demoted at end.",
+  "seed_data_creation": "None persistent. zTEST_ allergens created and deleted in same test. Operator users test_ops_*, uiops_* created via /api/auth/register; promoted user was demoted back to 'user' before test end.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "New testids to leverage: subtab-catalogo, subtab-utenti, subtab-registro; audit-count, audit-refresh, audit-entry; admin-users-count, admin-users-refresh, admin-user-row-<email>, admin-user-role-<email>, admin-promote-<email>, admin-demote-<email>. When asserting UI counts, wait for at least one row/entry testid before reading the badge (Badge renders '0' during initial mount, updates after fetch)."
+}
