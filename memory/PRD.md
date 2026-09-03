@@ -36,3 +36,10 @@ App web "AllergoLab" per selezionare allergeni e creare un promemoria/report da 
 
 ## Next tasks
 - Ricevere il logo aziendale e integrarlo.
+
+## Aggiornamento (2026-06 · iterazione 3)
+- [x] Catalogo allergeni spostato in MongoDB (seed 282 all'avvio da allergens.json).
+- [x] Tab "Configurazione" admin-only (RBAC): CRUD allergeni (aggiungi/modifica/elimina) con ricerca; il catalogo del "Nuovo Report" si ricarica dopo le modifiche.
+- [x] Endpoint /api/admin/allergens protetti da get_admin_user (403 per non-admin).
+- [x] Confermato isolamento report per utente (ownership su user_id: list/get/delete). Ogni utente vede solo i propri report/storico.
+- [x] Testing agent: 100% (backend 13/13, frontend).

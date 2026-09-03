@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
-import { FileText, ClipboardList, History, Trash2, Eye } from "lucide-react";
+import { FileText, ClipboardList, History, Trash2, Eye, Settings } from "lucide-react";
 import Header from "../components/Header";
 import PatientForm from "../components/PatientForm";
 import DualList from "../components/DualList";
 import SissSummary from "../components/SissSummary";
 import ReportModal from "../components/ReportModal";
+import AdminAllergens from "../components/AdminAllergens";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
@@ -23,15 +24,18 @@ export default function AppPage() {
   const [history, setHistory] = useState([]);
   const debounceRef = useRef(null);
 
-  useEffect(() => {
+  const loadAllergens = useCallback(() => {
     api.get("/allergens").then((r) => setAllergens(r.data)).catch(() => toast.error("Errore caricamento allergeni"));
-    loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadHistory = useCallback(() => {
     api.get("/reports").then((r) => setHistory(r.data)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    loadAllergens();
+    loadHistory();
+  }, [loadAllergens, loadHistory]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -92,6 +96,11 @@ export default function AppPage() {
             <TabsTrigger value="storico" data-testid="tab-storico">
               <History className="h-4 w-4 mr-1.5" /> Storico ({history.length})
             </TabsTrigger>
+            {user?.role === "admin" && (
+              <TabsTrigger value="config" data-testid="tab-config">
+                <Settings className="h-4 w-4 mr-1.5" /> Configurazione
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="nuovo" className="space-y-6">
@@ -147,6 +156,12 @@ export default function AppPage() {
               </div>
             )}
           </TabsContent>
+
+          {user?.role === "admin" && (
+            <TabsContent value="config">
+              <AdminAllergens allergens={allergens} onChanged={loadAllergens} />
+            </TabsContent>
+          )}
         </Tabs>
       </main>
 

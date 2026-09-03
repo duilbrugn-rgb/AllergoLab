@@ -34,10 +34,17 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 EMERGENT_SESSION_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
 
-# Load allergen dataset
+# Seed source for the allergen dataset (loaded into MongoDB on startup)
 with open(ROOT_DIR / 'allergens.json', 'r', encoding='utf-8') as f:
-    ALLERGENS = json.load(f)
-ALLERGENS_BY_CODE = {a['code']: a for a in ALLERGENS}
+    SEED_ALLERGENS = json.load(f)
+
+ALLERGEN_TYPES = ["Alimenti", "Inalanti", "Farmaci", "Veleni", "Allergeni molecolari"]
+
+
+async def fetch_allergens_by_codes(codes):
+    docs = await db.allergens.find({"code": {"$in": codes}}, {"_id": 0}).to_list(2000)
+    by_code = {d["code"]: d for d in docs}
+    return [by_code[c] for c in codes if c in by_code]
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("allergolab")
@@ -129,6 +136,12 @@ async def get_current_user(request: Request) -> dict:
     raise HTTPException(status_code=401, detail="Non autenticato")
 
 
+async def get_admin_user(user: dict = Depends(get_current_user)) -> dict:
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accesso riservato agli amministratori")
+    return user
+
+
 # --- Models ---
 class RegisterInput(BaseModel):
     email: EmailStr
@@ -158,6 +171,14 @@ class ReportInput(BaseModel):
 
 class AggregateInput(BaseModel):
     codes: List[str]
+
+
+class AllergenInput(BaseModel):
+    code: str = Field(min_length=1)
+    name: str = Field(min_length=1)
+    type: str
+    siss_code: str = Field(min_length=1)
+    siss_description: str = ""
 
 
 # --- Auth endpoints ---
@@ -288,20 +309,20 @@ async def me(user: dict = Depends(get_current_user)):
 # --- Allergens ---
 @api_router.get("/allergens")
 async def get_allergens(user: dict = Depends(get_current_user)):
-    return ALLERGENS
+    return await db.allergens.find({}, {"_id": 0}).sort("code", 1).to_list(2000)
 
 
 # --- Aggregation ---
 @api_router.post("/aggregate")
 async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current_user)):
-    items = [ALLERGENS_BY_CODE[c] for c in data.codes if c in ALLERGENS_BY_CODE]
+    items = await fetch_allergens_by_codes(data.codes)
     return aggregate(items)
 
 
 # --- Reports ---
 @api_router.post("/reports")
 async def create_report(data: ReportInput, user: dict = Depends(get_current_user)):
-    items = [ALLERGENS_BY_CODE[c] for c in data.allergen_codes if c in ALLERGENS_BY_CODE]
+    items = await fetch_allergens_by_codes(data.allergen_codes)
     agg = aggregate(items)
     report_id = f"rep_{uuid.uuid4().hex[:12]}"
     doc = {
@@ -343,9 +364,55 @@ async def delete_report(report_id: str, user: dict = Depends(get_current_user)):
     return {"ok": True}
 
 
+# --- Admin: gestione catalogo allergeni (solo amministratori) ---
+@api_router.get("/admin/allergens")
+async def admin_list_allergens(user: dict = Depends(get_admin_user)):
+    return await db.allergens.find({}, {"_id": 0}).sort("code", 1).to_list(2000)
+
+
+@api_router.post("/admin/allergens")
+async def admin_create_allergen(data: AllergenInput, user: dict = Depends(get_admin_user)):
+    if data.type not in ALLERGEN_TYPES:
+        raise HTTPException(status_code=400, detail="Tipologia non valida")
+    code = data.code.strip()
+    if await db.allergens.find_one({"code": code}):
+        raise HTTPException(status_code=400, detail="Codice già esistente")
+    doc = data.model_dump()
+    doc["code"] = code
+    await db.allergens.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/admin/allergens/{code}")
+async def admin_update_allergen(code: str, data: AllergenInput, user: dict = Depends(get_admin_user)):
+    if data.type not in ALLERGEN_TYPES:
+        raise HTTPException(status_code=400, detail="Tipologia non valida")
+    existing = await db.allergens.find_one({"code": code})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Allergene non trovato")
+    new_code = data.code.strip()
+    if new_code != code and await db.allergens.find_one({"code": new_code}):
+        raise HTTPException(status_code=400, detail="Il nuovo codice è già in uso")
+    doc = data.model_dump()
+    doc["code"] = new_code
+    await db.allergens.update_one({"code": code}, {"$set": doc})
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.delete("/admin/allergens/{code}")
+async def admin_delete_allergen(code: str, user: dict = Depends(get_admin_user)):
+    res = await db.allergens.delete_one({"code": code})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Allergene non trovato")
+    return {"ok": True}
+
+
 @api_router.get("/")
 async def root():
-    return {"message": "AllergoLab API", "allergens": len(ALLERGENS)}
+    count = await db.allergens.count_documents({})
+    return {"message": "AllergoLab API", "allergens": count}
 
 
 app.include_router(api_router)
@@ -364,6 +431,10 @@ async def startup():
     await db.users.create_index("email", unique=True)
     await db.user_sessions.create_index("session_token")
     await db.reports.create_index("user_id")
+    await db.allergens.create_index("code", unique=True)
+    if await db.allergens.count_documents({}) == 0:
+        await db.allergens.insert_many([dict(a) for a in SEED_ALLERGENS])
+        logger.info("Seeded %d allergens", len(SEED_ALLERGENS))
     # Seed admin/owner
     existing = await db.users.find_one({"email": ADMIN_EMAIL.lower()})
     if existing is None:
