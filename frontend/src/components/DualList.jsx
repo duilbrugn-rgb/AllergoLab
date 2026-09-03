@@ -1,0 +1,274 @@
+import { useMemo, useState } from "react";
+import { Search, X, ChevronRight, ChevronLeft, Trash2, Plus } from "lucide-react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
+import { Badge } from "./ui/badge";
+import { CATEGORIES, CATEGORY_ORDER } from "../lib/categories";
+
+function CategoryPill({ type }) {
+  const c = CATEGORIES[type];
+  if (!c) return null;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${c.pill}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+      {c.label}
+    </span>
+  );
+}
+
+export default function DualList({ allergens, selectedCodes, setSelectedCodes }) {
+  const [sourceSearch, setSourceSearch] = useState("");
+  const [selectedSearch, setSelectedSearch] = useState("");
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [checked, setChecked] = useState({});
+
+  const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
+
+  const toggleFilter = (type) =>
+    setActiveFilters((f) =>
+      f.includes(type) ? f.filter((x) => x !== type) : [...f, type]
+    );
+
+  const filteredSource = useMemo(() => {
+    const q = sourceSearch.trim().toLowerCase();
+    return allergens.filter((a) => {
+      if (selectedSet.has(a.code)) return false;
+      if (activeFilters.length && !activeFilters.includes(a.type)) return false;
+      if (!q) return true;
+      return (
+        a.code.toLowerCase().includes(q) ||
+        a.name.toLowerCase().includes(q) ||
+        (a.siss_code || "").toLowerCase().includes(q)
+      );
+    });
+  }, [allergens, sourceSearch, activeFilters, selectedSet]);
+
+  const selectedItems = useMemo(() => {
+    const q = selectedSearch.trim().toLowerCase();
+    const byCode = new Map(allergens.map((a) => [a.code, a]));
+    return selectedCodes
+      .map((c) => byCode.get(c))
+      .filter(Boolean)
+      .filter((a) =>
+        !q
+          ? true
+          : a.code.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+      );
+  }, [selectedCodes, selectedSearch, allergens]);
+
+  const checkedCodes = filteredSource.filter((a) => checked[a.code]).map((a) => a.code);
+
+  const addSelected = () => {
+    if (!checkedCodes.length) return;
+    setSelectedCodes([...selectedCodes, ...checkedCodes]);
+    setChecked({});
+  };
+
+  const addAllVisible = () => {
+    const codes = filteredSource.map((a) => a.code);
+    if (!codes.length) return;
+    setSelectedCodes([...selectedCodes, ...codes]);
+    setChecked({});
+  };
+
+  const removeOne = (code) => setSelectedCodes(selectedCodes.filter((c) => c !== code));
+  const clearAll = () => setSelectedCodes([]);
+
+  const addSingle = (code) => {
+    if (!selectedSet.has(code)) setSelectedCodes([...selectedCodes, code]);
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+      {/* Source list */}
+      <div className="lg:col-span-5 flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="p-3 border-b border-slate-100 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-heading font-semibold text-slate-900 text-sm">
+              Catalogo esami
+            </h3>
+            <span className="text-xs text-slate-500" data-testid="source-count">
+              {filteredSource.length} disponibili
+            </span>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+            <Input
+              value={sourceSearch}
+              onChange={(e) => setSourceSearch(e.target.value)}
+              placeholder="Cerca codice o allergene…"
+              className="pl-8"
+              data-testid="search-source-allergens"
+            />
+            {sourceSearch && (
+              <button
+                onClick={() => setSourceSearch("")}
+                className="absolute right-2 top-2.5 text-slate-400 hover:text-slate-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORY_ORDER.map((type) => {
+              const c = CATEGORIES[type];
+              const on = activeFilters.includes(type);
+              return (
+                <button
+                  key={type}
+                  onClick={() => toggleFilter(type)}
+                  data-testid={`filter-category-badge-${type}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-colors ${
+                    on ? c.active : c.pill
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${on ? "bg-white" : c.dot}`}
+                  />
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto max-h-[52vh] divide-y divide-slate-50">
+          {filteredSource.map((a) => (
+            <label
+              key={a.code}
+              data-testid={`source-allergen-item-${a.code}`}
+              className="flex items-start gap-2.5 px-3 py-2 hover:bg-sky-50/60 cursor-pointer group"
+            >
+              <Checkbox
+                checked={!!checked[a.code]}
+                onCheckedChange={(v) => setChecked({ ...checked, [a.code]: !!v })}
+                data-testid={`select-allergen-checkbox-${a.code}`}
+                className="mt-0.5"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-slate-500">
+                    {a.code}
+                  </span>
+                  <CategoryPill type={a.type} />
+                </div>
+                <p className="text-sm text-slate-800 truncate">{a.name}</p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  addSingle(a.code);
+                }}
+                className="opacity-0 group-hover:opacity-100 text-sky-600 hover:text-sky-800 transition-opacity"
+                title="Aggiungi"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </label>
+          ))}
+          {!filteredSource.length && (
+            <p className="p-6 text-center text-sm text-slate-400">
+              Nessun allergene trovato
+            </p>
+          )}
+        </div>
+
+        <div className="p-2.5 border-t border-slate-100 flex gap-2">
+          <Button
+            size="sm"
+            onClick={addSelected}
+            disabled={!checkedCodes.length}
+            data-testid="btn-add-selected-allergens"
+            className="flex-1 bg-sky-600 hover:bg-sky-700"
+          >
+            Aggiungi selezionati ({checkedCodes.length})
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={addAllVisible} data-testid="btn-add-all-allergens">
+            Tutti
+          </Button>
+        </div>
+      </div>
+
+      {/* Middle arrows (desktop) */}
+      <div className="hidden lg:flex lg:col-span-2 flex-col items-center justify-center gap-3 text-slate-300">
+        <ChevronRight className="h-8 w-8" />
+        <ChevronLeft className="h-8 w-8" />
+      </div>
+
+      {/* Selected list */}
+      <div className="lg:col-span-5 flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="p-3 border-b border-slate-100 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-heading font-semibold text-slate-900 text-sm">
+              Esami selezionati
+            </h3>
+            <Badge className="bg-sky-600 hover:bg-sky-600" data-testid="selected-count">
+              {selectedCodes.length}
+            </Badge>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+            <Input
+              value={selectedSearch}
+              onChange={(e) => setSelectedSearch(e.target.value)}
+              placeholder="Filtra selezionati…"
+              className="pl-8"
+              data-testid="search-selected-allergens"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto max-h-[52vh] divide-y divide-slate-50">
+          {selectedItems.map((a) => (
+            <div
+              key={a.code}
+              data-testid={`selected-allergen-item-${a.code}`}
+              className="flex items-start gap-2.5 px-3 py-2 hover:bg-rose-50/40 group"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-slate-500">
+                    {a.code}
+                  </span>
+                  <CategoryPill type={a.type} />
+                </div>
+                <p className="text-sm text-slate-800 truncate">{a.name}</p>
+              </div>
+              <button
+                onClick={() => removeOne(a.code)}
+                data-testid={`remove-allergen-${a.code}`}
+                className="text-slate-300 group-hover:text-rose-600 transition-colors"
+                title="Rimuovi"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          {!selectedItems.length && (
+            <p className="p-6 text-center text-sm text-slate-400">
+              Nessun esame selezionato. Aggiungi allergeni dal catalogo.
+            </p>
+          )}
+        </div>
+
+        <div className="p-2.5 border-t border-slate-100 flex justify-end">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={clearAll}
+            disabled={!selectedCodes.length}
+            data-testid="btn-clear-all-selected"
+            className="text-slate-500 hover:text-rose-600"
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            Svuota lista
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

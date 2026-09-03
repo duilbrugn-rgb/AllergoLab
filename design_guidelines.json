@@ -1,0 +1,153 @@
+{
+  "project_name": "AllergoLab",
+  "app_type": "clinical_medical_lab_app",
+  "theme_strategy": "Light mode primary with high contrast clinical precision, plus dark mode toggle support. Dedicated A4 print layout styling.",
+  "color_palette": {
+    "primary_slate": "#0F172A",
+    "primary_brand_blue": "#0284C7",
+    "primary_brand_hover": "#0369A1",
+    "secondary_teal": "#0F766E",
+    "background_main": "#F8FAFC",
+    "card_background": "#FFFFFF",
+    "border_color": "#E2E8F0",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "category_badges": {
+      "Alimenti": {
+        "bg": "bg-amber-50",
+        "text": "text-amber-800",
+        "border": "border-amber-200",
+        "hex": "#D97706"
+      },
+      "Inalanti": {
+        "bg": "bg-sky-50",
+        "text": "text-sky-800",
+        "border": "border-sky-200",
+        "hex": "#0284C7"
+      },
+      "Farmaci": {
+        "bg": "bg-emerald-50",
+        "text": "text-emerald-800",
+        "border": "border-emerald-200",
+        "hex": "#059669"
+      },
+      "Veleni": {
+        "bg": "bg-rose-50",
+        "text": "text-rose-800",
+        "border": "border-rose-200",
+        "hex": "#E11D48"
+      },
+      "Allergeni Molecolari": {
+        "bg": "bg-indigo-50",
+        "text": "text-indigo-800",
+        "border": "border-indigo-200",
+        "hex": "#4F46E5"
+      }
+    },
+    "siss_code_badge": {
+      "bg": "bg-slate-100",
+      "text": "text-slate-800",
+      "border": "border-slate-300"
+    }
+  },
+  "typography": {
+    "font_family_heading": "Plus Jakarta Sans, sans-serif",
+    "font_family_body": "Inter, sans-serif",
+    "font_family_mono": "IBM Plex Mono, monospace",
+    "hierarchy": {
+      "h1": "text-3xl sm:text-4xl font-bold tracking-tight text-slate-900",
+      "h2": "text-xl sm:text-2xl font-semibold tracking-tight text-slate-900",
+      "h3": "text-lg sm:text-xl font-medium text-slate-800",
+      "body": "text-sm text-slate-700 leading-relaxed",
+      "small_label": "text-xs font-semibold uppercase tracking-wider text-slate-500",
+      "code_mono": "font-mono text-sm font-semibold text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200"
+    }
+  },
+  "layout_and_grid": {
+    "container_padding": "p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto",
+    "dual_list_grid": "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start",
+    "source_list_span": "lg:col-span-5",
+    "action_buttons_span": "lg:col-span-2 flex flex-row lg:flex-col items-center justify-center gap-2 py-4",
+    "selected_list_span": "lg:col-span-5",
+    "siss_summary_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6"
+  },
+  "key_components_guidelines": {
+    "header_nav": "Sticky header with medical lab icon, AllergoLab title, company logo placeholder spot, user badge (Medico richiedente), tab switcher, theme toggle, and Logout button.",
+    "auth_screen": "Clean centered card layout with tabs for Login and Registrazione, Google login button integrated, form inputs for Email, Password, Nome, and Cognome (with explicit note: 'Il tuo Nome e Cognome verranno usati come Medico Richiedente nei report').",
+    "patient_form": "Card component with grid inputs for Nome Paziente, Cognome Paziente, Data di Nascita (using Shadcn Popover/Calendar or formatted date input), and Medico Richiedente (prefilled from profile, editable). Includes quick actions (Reset, Clear selection).",
+    "dual_list_transfer": {
+      "source_list": "Search input with clear button, filter badges for 5 categories (Alimenti, Inalanti, Farmaci, Veleni, Allergeni Molecolari), counter of visible items vs selected, scrollable high-density item list with checkboxes and category color pills.",
+      "selected_list": "List of selected allergens organized grouped or flat, search bar for selected items, clear-all action, remove button per item, total count badge.",
+      "transfer_controls": "Distinct clinical buttons with arrows ('Aggiungi Tutti →', 'Aggiungi Selezionati →', '← Rimuovi', 'Clear All') with keyboard shortcuts or responsive mobile layout."
+    },
+    "siss_aggregation_panel": "Highlighted clinical summary card. Displays the output of Algoritmo Allegato 2: list of SISS Codes (e.g. 90.68.1), Description, Quantity Multiplier (e.g. x 3), and total allergens mapped. Includes quick copy recipe text action.",
+    "printable_report_modal": {
+      "preview_mode": "Allows inline editing of report header, notes, doctor name, patient details before printing.",
+      "print_styles": "Includes @media print CSS rules. Hides navbars, buttons, sidebars. Formats header letterhead with logo placeholder, structured patient table, selected allergens table, SISS prescription box, doctor signature line, and date timestamp."
+    }
+  },
+  "media_assets": {
+    "laboratory_images": [
+      {
+        "url": "https://images.unsplash.com/photo-1639772823849-6efbd173043c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwyfHxjbGluaWNhbCUyMGxhYm9yYXRvcnklMjBtZWRpY2FsJTIwZG9jdG9yfGVufDB8fHx8MTc4ODQ0MzkxNXww&ixlib=rb-4.1.0&q=85",
+        "category": "auth_banner",
+        "description": "Clinical laboratory test tube sample handling"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1582560475093-ba66accbc424?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwzfHxjbGluaWNhbCUyMGxhYm9yYXRvcnklMjBtZWRpY2FsJTIwZG9jdG9yfGVufDB8fHx8MTc4ODQ0MzkxNXww&ixlib=rb-4.1.0&q=85",
+        "category": "lab_hero",
+        "description": "Medical lab technician pipetting samples"
+      }
+    ],
+    "company_logo_placeholder": "SVG/PNG placeholder component for customizable clinic/hospital logo in header and printable report."
+  },
+  "test_id_conventions": {
+    "auth": {
+      "login_email": "login-email-input",
+      "login_password": "login-password-input",
+      "login_submit": "login-submit-button",
+      "google_login": "google-login-button",
+      "register_firstname": "register-firstname-input",
+      "register_lastname": "register-lastname-input",
+      "register_email": "register-email-input",
+      "register_password": "register-password-input",
+      "register_submit": "register-submit-button"
+    },
+    "patient_form": {
+      "patient_firstname": "patient-firstname-input",
+      "patient_lastname": "patient-lastname-input",
+      "patient_dob": "patient-dob-input",
+      "doctor_name": "doctor-name-input"
+    },
+    "dual_list": {
+      "search_source": "search-source-allergens",
+      "filter_badge": "filter-category-badge-{category}",
+      "source_item": "source-allergen-item-{id}",
+      "select_checkbox": "select-allergen-checkbox-{id}",
+      "btn_add_selected": "btn-add-selected-allergens",
+      "btn_remove_selected": "btn-remove-selected-allergens",
+      "selected_item": "selected-allergen-item-{id}",
+      "btn_clear_all": "btn-clear-all-selected"
+    },
+    "siss_results": {
+      "siss_card": "siss-summary-card-{sissCode}",
+      "siss_quantity": "siss-quantity-badge-{sissCode}",
+      "siss_copy_recipe": "siss-copy-recipe-button"
+    },
+    "report": {
+      "btn_preview_report": "btn-preview-report-button",
+      "btn_edit_report": "btn-edit-report-button",
+      "btn_print_report": "btn-print-report-button",
+      "report_container": "printable-report-container"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Use JS / JSX components as structured in src/components/ui/.",
+    "Implement the full allergen dataset (280+ items) loaded from a dedicated JSON dataset (Allegato 1) with fields: code, description, type (Alimenti, Inalanti, Farmaci, Veleni, Allergeni Molecolari), and default SISS code.",
+    "Implement the aggregation algorithm (Allegato 2): group selected allergens, compute required SISS codes and multiplier quantities.",
+    "Ensure all interactive elements have data-testid attributes according to the specified conventions.",
+    "Include @media print CSS rules in App.css or index.css so the report prints cleanly on A4 paper without navigation bars, action buttons, or scrollbars.",
+    "Ensure toast notifications use sonner from /app/frontend/src/components/ui/sonner.jsx.",
+    "Provide Google login button state/handling via Emergent auth flow or mock implementation if live keys are absent."
+  ]
+}

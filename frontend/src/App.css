@@ -1,0 +1,32 @@
+.App {
+  min-height: 100vh;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  /* Show only the report */
+  body * {
+    visibility: hidden;
+  }
+  #allergolab-report,
+  #allergolab-report * {
+    visibility: visible;
+  }
+  #allergolab-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px 32px !important;
+    box-shadow: none !important;
+  }
+  [data-testid="btn-print-report-button"],
+  .no-print {
+    display: none !important;
+  }
+}

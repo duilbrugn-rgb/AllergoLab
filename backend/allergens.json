@@ -1,0 +1,1976 @@
+[
+  {
+    "code": "f1",
+    "name": "Albume",
+    "type": "Alimenti",
+    "siss_code": "0090681.01",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f1 - Albume"
+  },
+  {
+    "code": "f10",
+    "name": "Semi di sesamo (Sesamum indicum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.10",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f10 - Semi di sesamo"
+  },
+  {
+    "code": "f11",
+    "name": "Grano saraceno (Fagopyrum esculentum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.11",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f11 - Grano saraceno"
+  },
+  {
+    "code": "f12",
+    "name": "Piselli (Pisum sativum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.12",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f12 - Piselli"
+  },
+  {
+    "code": "f124",
+    "name": "Farro (Triticum spelta)",
+    "type": "Alimenti",
+    "siss_code": "0090681.51",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f124 - Farro"
+  },
+  {
+    "code": "f13",
+    "name": "Arachide (Arachis hypogaea)",
+    "type": "Alimenti",
+    "siss_code": "0090681.13",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f13 - Arachide"
+  },
+  {
+    "code": "f14",
+    "name": "Semi di soia (Glycine max)",
+    "type": "Alimenti",
+    "siss_code": "0090681.14",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f14 - Semi di soia"
+  },
+  {
+    "code": "f15",
+    "name": "Fagioli bianchi (Phaseolus vulgaris)",
+    "type": "Alimenti",
+    "siss_code": "0090681.15",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f15 - Fagiolo bianco"
+  },
+  {
+    "code": "f17",
+    "name": "Nocciola (Corylus avellana)",
+    "type": "Alimenti",
+    "siss_code": "0090681.16",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f17 - Nocciola"
+  },
+  {
+    "code": "f18",
+    "name": "Noce brasiliana (Bertholletia excelsa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.17",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f18 - Noce brasiliana"
+  },
+  {
+    "code": "f2",
+    "name": "Latte",
+    "type": "Alimenti",
+    "siss_code": "0090681.02",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f2 - Latte"
+  },
+  {
+    "code": "f20",
+    "name": "Mandorla (Amygdalus communis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.18",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f20 -Mandorla"
+  },
+  {
+    "code": "f202",
+    "name": "Anacardio (Anacardium occidentale)",
+    "type": "Alimenti",
+    "siss_code": "0090681.53",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f202 - Anacardio"
+  },
+  {
+    "code": "f203",
+    "name": "Pistacchio (Pistacia vera)",
+    "type": "Alimenti",
+    "siss_code": "0090681.54",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f203 - Pistacchio"
+  },
+  {
+    "code": "f207",
+    "name": "Vongola (Ruditapes spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.57",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f207 - Vongola"
+  },
+  {
+    "code": "f208",
+    "name": "Limone (Citrus limon)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f210",
+    "name": "Ananas (Ananas comosus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.58",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f210 Ananas"
+  },
+  {
+    "code": "f211",
+    "name": "Mora (Rubus fruticosus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f213",
+    "name": "Carne di coniglio (Oryctolagus spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f214",
+    "name": "Spinaci (Spinachia oleracea)",
+    "type": "Alimenti",
+    "siss_code": "0090681.60",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f214 - Spinaci"
+  },
+  {
+    "code": "f215",
+    "name": "Lattuga (Lactuca sativa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.61",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f215 - Lattuga"
+  },
+  {
+    "code": "f216",
+    "name": "Cavolo (Brassica oleracea var. italica)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f218",
+    "name": "Paprica, Peperone (Capsicum annuum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.62",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f218 - Paprika (peperone)"
+  },
+  {
+    "code": "f224",
+    "name": "Semi di papavero (Papaver somniferum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f225",
+    "name": "Zucca (Cucurbita pepo)",
+    "type": "Alimenti",
+    "siss_code": "0090681.64",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f225 - Zucca"
+  },
+  {
+    "code": "f226",
+    "name": "Semi di zucca (Curcubita pepo)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f23",
+    "name": "Granchio comune (Cancer pagurus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.19",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f23 - Granchio comune"
+  },
+  {
+    "code": "f231",
+    "name": "Latte bollito",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f234",
+    "name": "Vaniglia (Vanilla planifolia)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f235",
+    "name": "Lenticchia (Lens esculenta)",
+    "type": "Alimenti",
+    "siss_code": "0090681.65",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f235 - Lenticchie"
+  },
+  {
+    "code": "f237",
+    "name": "Albicocca (Prunus armeniaca)",
+    "type": "Alimenti",
+    "siss_code": "0090681.66",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f237 - Albicocca"
+  },
+  {
+    "code": "f24",
+    "name": "Gambero (Pandalus borealis, Penaeus monodon)",
+    "type": "Alimenti",
+    "siss_code": "0090681.20",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f24 - Gambero"
+  },
+  {
+    "code": "f242",
+    "name": "Ciliegia (Prunus avium)",
+    "type": "Alimenti",
+    "siss_code": "0090681.67",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f242 - Ciliegia"
+  },
+  {
+    "code": "f244",
+    "name": "Cetriolo (Cucumis sativus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f246",
+    "name": "Gomma di guar (E412) (Cyamopsis tetragonolobus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.68",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f246 - Gomma di Guar"
+  },
+  {
+    "code": "f25",
+    "name": "Pomodoro (Lycopersicon lycopersicum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.21",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f25 - Pomodoro"
+  },
+  {
+    "code": "f253",
+    "name": "Pinoli (Pinus edulis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.69",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f253 - Pinoli"
+  },
+  {
+    "code": "f254",
+    "name": "Platessa (Pleuronectes platessa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.70",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f254 - Platessa"
+  },
+  {
+    "code": "f255",
+    "name": "Prugna (Prunus domestica)",
+    "type": "Alimenti",
+    "siss_code": "0090681.71",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f255 - Prugna"
+  },
+  {
+    "code": "f256",
+    "name": "Noce (Juglans spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.72",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f256 - Noce"
+  },
+  {
+    "code": "f259",
+    "name": "Uva (Vitis vinifera)",
+    "type": "Alimenti",
+    "siss_code": "0090681.74",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f259 - Uva"
+  },
+  {
+    "code": "f26",
+    "name": "Carne di maiale (Sus spp. )",
+    "type": "Alimenti",
+    "siss_code": "0090681.22",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f26 - Maiale"
+  },
+  {
+    "code": "f261",
+    "name": "Asparago (Asparagus officinalis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.76",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f261 - Asparago"
+  },
+  {
+    "code": "f27",
+    "name": "Carne di bue (Bos spp. )",
+    "type": "Alimenti",
+    "siss_code": "0090681.23",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f27 - Bue/Manzo"
+  },
+  {
+    "code": "f270",
+    "name": "Zenzero (Zingiber officinale)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f279",
+    "name": "Pepe di cayenna (Capisicum frutescens)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f280",
+    "name": "Pepe nero (Piper nigrum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.80",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f280 - Pepe nero"
+  },
+  {
+    "code": "f284",
+    "name": "Carne di tacchino (Meleagris gallopavo)",
+    "type": "Alimenti",
+    "siss_code": "0090681.81",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f284 - Tacchino"
+  },
+  {
+    "code": "f288",
+    "name": "Mirtillo nero (Vaccinium myrtillis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.83",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f288 - Mirtillo nero"
+  },
+  {
+    "code": "f293",
+    "name": "Papaya (Carica papaya)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f294",
+    "name": "Frutto della passione (Passiflora edulis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f296",
+    "name": "Carruba (E410) (Ceratonia siliqua)",
+    "type": "Alimenti",
+    "siss_code": "0090681.85",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f296 - Carruba"
+  },
+  {
+    "code": "f297",
+    "name": "Gomma arabica (E414) (Acacia spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.86",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f297 - Gomma arabica"
+  },
+  {
+    "code": "f299",
+    "name": "Castagna (Castanea sativa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f3",
+    "name": "Pesce, Merluzzo (Gadus morhua)",
+    "type": "Alimenti",
+    "siss_code": "0090681.03",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f3 - Pesce (merluzzo)"
+  },
+  {
+    "code": "f300",
+    "name": "Latte di capra",
+    "type": "Alimenti",
+    "siss_code": "0090681.87",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f300 - Latte di capra"
+  },
+  {
+    "code": "f301",
+    "name": "Kaki (Diospyros kaki)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f31",
+    "name": "Carota (Daucus carota)",
+    "type": "Alimenti",
+    "siss_code": "0090681.24",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f31 - Carota"
+  },
+  {
+    "code": "f316",
+    "name": "Semi di colza (Brassica napus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f317",
+    "name": "Coriandolo (Coriandrum sativum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f33",
+    "name": "Arancia (Citrus sinensis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.25",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f33 - Arancia"
+  },
+  {
+    "code": "f332",
+    "name": "Menta (Mentha piperita)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f333",
+    "name": "Semi di lino (Linum usitatissimum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f335",
+    "name": "Semi di lupino (Lupinus albus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f343",
+    "name": "Lampone (Rubus idaeus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f345",
+    "name": "Noce di macadamia (Macadamia spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f347",
+    "name": "Quinoa (Chenopodium quinoa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f35",
+    "name": "Patata (Solanum tuberosum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.26",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f35 - Patata"
+  },
+  {
+    "code": "f36",
+    "name": "Noce di cocco (Cocus nucifera)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f37",
+    "name": "Mitile (Mytilus edulis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.30",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f44 - Mitili"
+  },
+  {
+    "code": "f4",
+    "name": "Grano (Triticum aestivum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.04",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f4 - Grano (frumento)"
+  },
+  {
+    "code": "f40",
+    "name": "Tonno (Thunnus albacares)",
+    "type": "Alimenti",
+    "siss_code": "0090681.27",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f40 - Tonno"
+  },
+  {
+    "code": "f41",
+    "name": "Salmone (Salmo salar)",
+    "type": "Alimenti",
+    "siss_code": "0090681.28",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f41 - Salmone"
+  },
+  {
+    "code": "f44",
+    "name": "Fragola (Fragaria vesca)",
+    "type": "Alimenti",
+    "siss_code": "0090681.29",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f44 - Fragola"
+  },
+  {
+    "code": "f45",
+    "name": "Lievito (Saccharomyces cerevisiae)",
+    "type": "Alimenti",
+    "siss_code": "0090681.31",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f45 - Lievito"
+  },
+  {
+    "code": "f47",
+    "name": "Aglio (Allium sativum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.32",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f47 - Aglio"
+  },
+  {
+    "code": "f48",
+    "name": "Cipolla (Allium cepa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.33",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f48 - Cipolla"
+  },
+  {
+    "code": "f49",
+    "name": "Mela (Malus x domestica)",
+    "type": "Alimenti",
+    "siss_code": "0090681.34",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f49 - Mela"
+  },
+  {
+    "code": "f5",
+    "name": "Segale (Secale cereale)",
+    "type": "Alimenti",
+    "siss_code": "0090681.05",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f5 - Segale (farina)"
+  },
+  {
+    "code": "f51",
+    "name": "Germogli di bambu (Phyllostachys pubescens)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f55",
+    "name": "Miglio comune (Panicum milliaceum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f58",
+    "name": "Seppia (Todarodes pacificus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f59",
+    "name": "Polpo (Octopus vulgaris)",
+    "type": "Alimenti",
+    "siss_code": "0090681.35",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f59 - Polpo"
+  },
+  {
+    "code": "f6",
+    "name": "Orzo (Hordeum volgare)",
+    "type": "Alimenti",
+    "siss_code": "0090681.06",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f6 - Orzo"
+  },
+  {
+    "code": "f7",
+    "name": "Avena (Avena sativa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.07",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f7 - Avena (farina)"
+  },
+  {
+    "code": "f75",
+    "name": "Tuorlo",
+    "type": "Alimenti",
+    "siss_code": "0090681.36",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f75 - Tuorlo d'uovo"
+  },
+  {
+    "code": "f79",
+    "name": "Glutine",
+    "type": "Alimenti",
+    "siss_code": "0090681.37",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f79 - Glutine"
+  },
+  {
+    "code": "f8",
+    "name": "Granoturco (Zea mays)",
+    "type": "Alimenti",
+    "siss_code": "0090681.08",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f8 - Mais"
+  },
+  {
+    "code": "f80",
+    "name": "Astice (Homarus Gammarus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.38",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f80 - Astice"
+  },
+  {
+    "code": "f83",
+    "name": "Carne di pollo (Gallus spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.39",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f83 - Pollo"
+  },
+  {
+    "code": "f84",
+    "name": "Kiwi (Actinidia deliciosa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.40",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f84 - Kiwi"
+  },
+  {
+    "code": "f85",
+    "name": "Sedano (Apium graveolens)",
+    "type": "Alimenti",
+    "siss_code": "0090681.41",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f85 - Sedano"
+  },
+  {
+    "code": "f86",
+    "name": "Prezzemolo (Petroselinum crispum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f87",
+    "name": "Melone (Cucumis melo spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.42",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f87 - Melone"
+  },
+  {
+    "code": "f88",
+    "name": "Carne di montone (Ovis spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.43",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f88 - Montone"
+  },
+  {
+    "code": "f89",
+    "name": "Senape (Brassica/Sinapis spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.44",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f89 - Senape"
+  },
+  {
+    "code": "f9",
+    "name": "Riso integrale (Oryza sativa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.09",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f9 - Riso"
+  },
+  {
+    "code": "f90",
+    "name": "Malto",
+    "type": "Alimenti",
+    "siss_code": "0090681.45",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f90 - Malto"
+  },
+  {
+    "code": "f91",
+    "name": "Mango (Mangifera indica)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "f92",
+    "name": "Banana (Musa spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.46",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f92 - Banana"
+  },
+  {
+    "code": "f94",
+    "name": "Pera (Pyrus communis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.48",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f94 - Pera"
+  },
+  {
+    "code": "f95",
+    "name": "Pesca (Prunus persica)",
+    "type": "Alimenti",
+    "siss_code": "0090681.49",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f95 - Pesca"
+  },
+  {
+    "code": "f96",
+    "name": "Avocado (Persea americana)",
+    "type": "Alimenti",
+    "siss_code": "0090681.50",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f96 - Avocado"
+  },
+  {
+    "code": "p1",
+    "name": "Ascaris",
+    "type": "Alimenti",
+    "siss_code": "0090681.E0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - p1 - Ascaris"
+  },
+  {
+    "code": "p4",
+    "name": "Anisakis",
+    "type": "Alimenti",
+    "siss_code": "0090681.E1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - p4 - Anisakis"
+  },
+  {
+    "code": "Rf206",
+    "name": "Sgombro (Scomber scombrus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.56",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f206 - Sgombro"
+  },
+  {
+    "code": "Rf212",
+    "name": "Funghi, champignon (Agaricus hortensis)",
+    "type": "Alimenti",
+    "siss_code": "0090681.59",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f212 - Funghi (champignon)"
+  },
+  {
+    "code": "Rf258",
+    "name": "Calamaro (Loligo spp.)",
+    "type": "Alimenti",
+    "siss_code": "0090681.73",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f258 - Calamaro"
+  },
+  {
+    "code": "Rf262",
+    "name": "Melanzana (Solanum melongena)",
+    "type": "Alimenti",
+    "siss_code": "0090681.77",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f262 - Melanzana"
+  },
+  {
+    "code": "Rf265",
+    "name": "Cumino (Carum carvi)",
+    "type": "Alimenti",
+    "siss_code": "0090681.78",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f265 - Cumino"
+  },
+  {
+    "code": "Rf266",
+    "name": "Macis (Myristica fragrans)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf267",
+    "name": "Cardamomo (Elettaria cardamomum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf268",
+    "name": "Chiodi di garofano (Syzygiun aromaticum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf269",
+    "name": "Basilico (Ocimum basilicum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf271",
+    "name": "Anice (Pimpinella anisum)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf276",
+    "name": "Finocchio fresco (Foeniculum vulgare)",
+    "type": "Alimenti",
+    "siss_code": "0090681.79",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f276 - Finocchio"
+  },
+  {
+    "code": "Rf302",
+    "name": "Mandarino (Citrus reticulata)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf304",
+    "name": "Aragosta (Palinurus spp)",
+    "type": "Alimenti",
+    "siss_code": "0090681.88",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f304 - Aragosta"
+  },
+  {
+    "code": "Rf308",
+    "name": "Sardina europea (Sardina pilchardus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf309",
+    "name": "Ceci (Cicer arietinus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.89",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f309 - Ceci"
+  },
+  {
+    "code": "Rf312",
+    "name": "Pesce Spada (Xiphias gladius)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf314",
+    "name": "Lumaca (Helix aspersa)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf319",
+    "name": "Barbabietola rossa (Beta vulgaris)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf328",
+    "name": "Fico (Ficus carica)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rf329",
+    "name": "Anguria (Citrullus lanatus)",
+    "type": "Alimenti",
+    "siss_code": "0090681.90",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - f329 - Anguria"
+  },
+  {
+    "code": "Rf342",
+    "name": "Oliva (Olea europaea)",
+    "type": "Alimenti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "d202",
+    "name": "Der p 1, Acaro della polvere domestica (Dermatophagoides Pteronyssinus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.13",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nDer p 1"
+  },
+  {
+    "code": "d203",
+    "name": "Der p 2, Acaro della polvere domestica (Dermatophagoides Pteronyssinus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.57",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rDer p 2"
+  },
+  {
+    "code": "d205",
+    "name": "Der p 10, Acaro della polvere domestica, Tropomiosina (Dermatophagoides Pteronyssinus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.56",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rDer p 10"
+  },
+  {
+    "code": "d209",
+    "name": "Der p 23, Acaro della polvere domestica (Dermatophagoides Pteronyssinus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.99",
+    "siss_description": "IGE SPEC.RICOMB.MOL. -rDer p 23"
+  },
+  {
+    "code": "e101",
+    "name": "Can f 1, Cane (Canis familiaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.46",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rCan f 1"
+  },
+  {
+    "code": "e102",
+    "name": "Can f 2, Cane (Canis familiaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.47",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rCan f 2"
+  },
+  {
+    "code": "e220",
+    "name": "Fel d 2, Gatto, Albumina sierica (Felis domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.60",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rFel d 2"
+  },
+  {
+    "code": "e226",
+    "name": "Can f 5, Cane (Canis familiaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.49",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rCan f 5"
+  },
+  {
+    "code": "e228",
+    "name": "Fel d 4, Gatto (Felis domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.61",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rFel d 4"
+  },
+  {
+    "code": "e94",
+    "name": "Fel d 1, Gatto (Felis domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.59",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rFel d 1"
+  },
+  {
+    "code": "f232",
+    "name": "Gal d 2, Uovo, Ovoalbumina (Gallus domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.15",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nGal d 2"
+  },
+  {
+    "code": "f233",
+    "name": "Gal d 1, Uovo, Ovomucoide (Gallus domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.14",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nGal d 1"
+  },
+  {
+    "code": "f351",
+    "name": "Pen a 1, Gamberetto, Tropomiosina (Penaeus aztecus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.78",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPen a 1"
+  },
+  {
+    "code": "f353",
+    "name": "Gly m 4, Soia, PR-10 (Glycine max)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.64",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rGly m 4 (PR-10)"
+  },
+  {
+    "code": "f354",
+    "name": "Ber e 1, Noce brasiliana (Bertholletia excelsa)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.41",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rBer e 1"
+  },
+  {
+    "code": "f416",
+    "name": "Tri a 19, Grano, Omega-5 Gliadina (Triticum aestivum)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.94",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rTri a 19"
+  },
+  {
+    "code": "f420",
+    "name": "Pru p 3, Pesca, LTP (Prunus persica)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.89",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPru p 3 (LPT)"
+  },
+  {
+    "code": "f422",
+    "name": "Ara h 1, Arachide (Arachis hypogaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.31",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAra h 1"
+  },
+  {
+    "code": "f423",
+    "name": "Ara h 2, Arachide (Arachis hypogaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.32",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAra h 2"
+  },
+  {
+    "code": "f424",
+    "name": "Ara h 3, Arachide (Arachis hypogaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.33",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAra h 3"
+  },
+  {
+    "code": "f425",
+    "name": "Cor a 8, Nocciola, LTP (Corylus avellana)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.53",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rCor a 8"
+  },
+  {
+    "code": "f426",
+    "name": "Gad c 1, Merluzzo, Parvalbumina (Gadus morhua)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.63",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rGad c 1"
+  },
+  {
+    "code": "f427",
+    "name": "Ara h 9, Arachide, LTP (Arachis hypogaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.98",
+    "siss_description": "IGE SPEC.RICOMB.MOL. -rAra h 9 (LTP)"
+  },
+  {
+    "code": "f431",
+    "name": "Gly m 5, Soia, Beta-conglicinina (Glycine max)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.18",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nGly m 5"
+  },
+  {
+    "code": "f432",
+    "name": "Gly m 6, Soia, Glicinina (Glycine max)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.19",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nGly m 6"
+  },
+  {
+    "code": "f433",
+    "name": "Tri a 14, Grano, LTP (Triticum aestivum)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.93",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rTri a 14 (LTP)"
+  },
+  {
+    "code": "f435",
+    "name": "Mal d 3, Mela, LTP (Malus domestica)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.74",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rMal d 3 (LTP)"
+  },
+  {
+    "code": "f439",
+    "name": "Cor a 14, Nocciola (Corylus avellana)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.52",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rCor a 14"
+  },
+  {
+    "code": "f440",
+    "name": "Cor a 9, Nocciola (Corylus avellana)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.54",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rCor a 9"
+  },
+  {
+    "code": "f441",
+    "name": "Jug r 1, Noce (Juglans regia)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.71",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rJug r 1"
+  },
+  {
+    "code": "f442",
+    "name": "Jug r 3, Noce, LTP (Juglans regia)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.72",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rJug r 3 (LTP)"
+  },
+  {
+    "code": "f443",
+    "name": "Ana o 3, Anacardo (Anacardium occidentale)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.24",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAna o 3"
+  },
+  {
+    "code": "f449",
+    "name": "Ses i 1, 2S Albumina, Sesamo (Sesamum Indicum)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.92",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rSes i 1"
+  },
+  {
+    "code": "f454",
+    "name": "Pru p 7, Pesca, GRP (Prunus persica)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.91",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPru p 7"
+  },
+  {
+    "code": "f76",
+    "name": "Bos d 4, Latte, Alfa-lattoalbumina (Bos domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.06",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nBos d 4 (Alfa-lattoalbumina)"
+  },
+  {
+    "code": "f77",
+    "name": "Bos d 5, Latte, Beta-lattoglobulina (Bos domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.07",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nBos d 5 (Beta-lattoglobulina)"
+  },
+  {
+    "code": "f78",
+    "name": "Bos d 8, Latte, Caseina (Bos domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.09",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nBos d 8 (Caseina)"
+  },
+  {
+    "code": "f98",
+    "name": "Gliadina (Triticum aestivum)",
+    "type": "Allergeni molecolari",
+    "siss_code": "0090681.H0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Gliadina"
+  },
+  {
+    "code": "g205",
+    "name": "Phl p 1, Coda di topo (Phleum pratense)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.79",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPhl p 1"
+  },
+  {
+    "code": "g210",
+    "name": "Phl p 7, Coda di topo (Phleum pratense - Polcalcina)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.A0",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPhl p 7"
+  },
+  {
+    "code": "g215",
+    "name": "Phl p 5b, Coda di topo (Phleum pratense)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.83",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPhl p 5b"
+  },
+  {
+    "code": "i208",
+    "name": "Api m 1, Ape, Fosfolipasi A2 (Apis mellifera)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.26",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rApi m 1"
+  },
+  {
+    "code": "i209",
+    "name": "Ves v 5, Vespa, Vitellogenina (Vespula vulgaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.96",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rVes v 5"
+  },
+  {
+    "code": "i210",
+    "name": "Pol d 5, Vespa cartonaia, Antigene 5 (Polistes dominulus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.87",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPol d 5"
+  },
+  {
+    "code": "i211",
+    "name": "Ves v 1, Vespa, Fosfolipasi A1 (Vespula vulgaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.95",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rVes v 1"
+  },
+  {
+    "code": "i214",
+    "name": "Api m 2, Ape, Ialuronidasi (Apis mellifera)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.29",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rApi m 2"
+  },
+  {
+    "code": "i215",
+    "name": "Api m 3, Ape, Fosfatasi acida (Apis mellifera)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.28",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rApi m 3"
+  },
+  {
+    "code": "i216",
+    "name": "Api m 5, Ape, Dipeptil-peptidasi IV (Apis mellifera)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.30",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rApi m 5"
+  },
+  {
+    "code": "i217",
+    "name": "Api m 10, Ape, Icarapina variante 2 (Apis mellifera)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.27",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rApi m 10"
+  },
+  {
+    "code": "k208",
+    "name": "Gal d 4, Uovo, Lisozima (Gallus domesticus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.17",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nGal d 4"
+  },
+  {
+    "code": "k215",
+    "name": "Hev b 1, Lattice (Hevea brasiliensis)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.65",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rHev b 1"
+  },
+  {
+    "code": "k217",
+    "name": "Hev b 3, Lattice (Hevea brasiliensis)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.67",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rHev b 3"
+  },
+  {
+    "code": "k218",
+    "name": "Hev b 5, Lattice (Hevea brasiliensis)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.68",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rHev b 5"
+  },
+  {
+    "code": "k220",
+    "name": "Hev b 6.02, Lattice (Hevea brasiliensis)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.69",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rHev b 6.02"
+  },
+  {
+    "code": "k221",
+    "name": "Hev b 8, Lattice, Profilina (Hevea brasiliensis)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.70",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rHev b 8"
+  },
+  {
+    "code": "k224",
+    "name": "Hev b 11, Lattice (Hevea brasiliensis)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.66",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rHev b 11"
+  },
+  {
+    "code": "k87",
+    "name": "Asp o 21, Alpha-amilasi (Aspergillus oryzae)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.05",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nAsp o 21"
+  },
+  {
+    "code": "m218",
+    "name": "Asp f 1 (Aspergillus fumigatus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.36",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAsp f 1"
+  },
+  {
+    "code": "m219",
+    "name": "Asp f 2 (Aspergillus fumigatus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.37",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAsp f 2"
+  },
+  {
+    "code": "m221",
+    "name": "Asp f 4 (Aspergillus fumigatus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.39",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAsp f 4"
+  },
+  {
+    "code": "m222",
+    "name": "Asp f 6 (Aspergillus fumigatus)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.40",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAsp f 6"
+  },
+  {
+    "code": "m229",
+    "name": "Alt a 1 (Alternaria alternata)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.23",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rAlt a 1"
+  },
+  {
+    "code": "o214",
+    "name": "MUXF3 CCD, Bromelina",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.01",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - MUXF3 CCD"
+  },
+  {
+    "code": "o215",
+    "name": "Galactose-alpha-1,3-Galactose (alpha-Gal) Tireoglobulina, bovina",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.97",
+    "siss_description": "IGE SPEC.RICOMB.MOL. -nGal-alpha-1,3-Gal (alpha-Gal)"
+  },
+  {
+    "code": "t215",
+    "name": "Bet v1, Betulla, PR-10 (Betula verrucosa)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.42",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rBet v 1"
+  },
+  {
+    "code": "t216",
+    "name": "Bet v2, Betulla, Profilina (Betula verrucosa)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.43",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rBet v 2"
+  },
+  {
+    "code": "t224",
+    "name": "Ole e 1, Olivo (Olea europaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.75",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rOle e 1"
+  },
+  {
+    "code": "t226",
+    "name": "Cup a 1, Cipresso (Cupressus arizonica)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.11",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nCup a 1"
+  },
+  {
+    "code": "t227",
+    "name": "Ole e 7 Olivo (Olea europaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.20",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nOle e 7"
+  },
+  {
+    "code": "t240",
+    "name": "Ole e 9 Olivo (Olea europaea)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.76",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rOle e 9"
+  },
+  {
+    "code": "w211",
+    "name": "Par j 2, Erba vetriola, LTP (Parietaria judaica)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.77",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - rPar j 2"
+  },
+  {
+    "code": "w230",
+    "name": "Amb a 1, Ambrosia (Ambrosia elatior)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.02",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nAmb a 1"
+  },
+  {
+    "code": "w231",
+    "name": "Art v 1, Assenzio selvatico (Artemisia vulgaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.03",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nArt v 1"
+  },
+  {
+    "code": "w233",
+    "name": "Art v 3, Assenzio selvatico, LTP (Artemisia vulgaris)",
+    "type": "Allergeni molecolari",
+    "siss_code": "009068A.04",
+    "siss_description": "IGE SPEC.RICOMB.MOL. - nArt v 3"
+  },
+  {
+    "code": "c1",
+    "name": "Penicilloyl G",
+    "type": "Farmaci",
+    "siss_code": "0090681.T8",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c1 - Penicilloyl G"
+  },
+  {
+    "code": "c2",
+    "name": "Penicilloyl V",
+    "type": "Farmaci",
+    "siss_code": "0090681.T9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c2 - Penicilloyl V"
+  },
+  {
+    "code": "c202",
+    "name": "Succinilcolina (Suxamethonium succinylcholine)",
+    "type": "Farmaci",
+    "siss_code": "0090681.U4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c202 - Succinilcolina"
+  },
+  {
+    "code": "c260",
+    "name": "Morfina (Morphine)",
+    "type": "Farmaci",
+    "siss_code": "0090681.U5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c260 - Morfina"
+  },
+  {
+    "code": "c5",
+    "name": "Ampicillina (Ampicilloyl)",
+    "type": "Farmaci",
+    "siss_code": "0090681.U0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c5 -Ampicillina"
+  },
+  {
+    "code": "c6",
+    "name": "Amoxicillina (Amoxicilloyl)",
+    "type": "Farmaci",
+    "siss_code": "0090681.U1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c6 -Amoxicillina"
+  },
+  {
+    "code": "c7",
+    "name": "Cefaclor",
+    "type": "Farmaci",
+    "siss_code": "0090681.U2",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c7 -Cefaclor"
+  },
+  {
+    "code": "c73",
+    "name": "Insulina umana (Insulin human)",
+    "type": "Farmaci",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "c74",
+    "name": "Gelatina (Gelatin bovine)",
+    "type": "Farmaci",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "c8",
+    "name": "Clorexidina (Chlorhexidine)",
+    "type": "Farmaci",
+    "siss_code": "0090681.U3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - c8 - Clorexidina"
+  },
+  {
+    "code": "d1",
+    "name": "Dermatophagoides pteronyssinus",
+    "type": "Inalanti",
+    "siss_code": "0090681.B4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d1 - Dermatophagoides pteronyssinus"
+  },
+  {
+    "code": "d2",
+    "name": "Dermatophagoides farinae",
+    "type": "Inalanti",
+    "siss_code": "0090681.B5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d2 - Dermatophagoides farinae"
+  },
+  {
+    "code": "d201",
+    "name": "Blomia tropicalis",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "d3",
+    "name": "Dermatophagoides microceras",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "d70",
+    "name": "Acarus siro",
+    "type": "Inalanti",
+    "siss_code": "0090681.B6",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d70 - Acarus siro"
+  },
+  {
+    "code": "d71",
+    "name": "Lepidoglyphus destructor",
+    "type": "Inalanti",
+    "siss_code": "0090681.B7",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d71 - Lepidoglyphus destructor"
+  },
+  {
+    "code": "d72",
+    "name": "Tyrophagus putrescentiae",
+    "type": "Inalanti",
+    "siss_code": "0090681.B8",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d72 - Tyrophagus putrescentiae"
+  },
+  {
+    "code": "d73",
+    "name": "Glycophagus domesticus",
+    "type": "Inalanti",
+    "siss_code": "0090681.B9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d73 - Glycophagus domesticus"
+  },
+  {
+    "code": "d74",
+    "name": "Euroglyphus maynei",
+    "type": "Inalanti",
+    "siss_code": "0090681.C0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - d74 - Euroglyphus maynei"
+  },
+  {
+    "code": "e1",
+    "name": "Epitelio di gatto",
+    "type": "Inalanti",
+    "siss_code": "0090681.C1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Forfora di gatto"
+  },
+  {
+    "code": "e3",
+    "name": "Forfora di cavallo",
+    "type": "Inalanti",
+    "siss_code": "0090681.C2",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Forfora di cavallo"
+  },
+  {
+    "code": "e4",
+    "name": "Forfora di vacca",
+    "type": "Inalanti",
+    "siss_code": "0090681.C3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Forfora di vacca"
+  },
+  {
+    "code": "e5",
+    "name": "Forfora di cane",
+    "type": "Inalanti",
+    "siss_code": "0090681.C4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Forfora di cane"
+  },
+  {
+    "code": "e70",
+    "name": "Piume d'oca",
+    "type": "Inalanti",
+    "siss_code": "0090681.C6",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Piuma d'oca"
+  },
+  {
+    "code": "e71",
+    "name": "Epitelio di topo",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "e80",
+    "name": "Epitelio di capra",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "e82",
+    "name": "Epitelio di coniglio",
+    "type": "Inalanti",
+    "siss_code": "0090681.C8",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Epitelio di coniglio"
+  },
+  {
+    "code": "e83",
+    "name": "Epitelio di maiale",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "e84",
+    "name": "Epitelio di criceto",
+    "type": "Inalanti",
+    "siss_code": "0090681.C9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Epitelio di criceto"
+  },
+  {
+    "code": "e85",
+    "name": "Piume di pollo",
+    "type": "Inalanti",
+    "siss_code": "0090681.D1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - Piume di pollo"
+  },
+  {
+    "code": "g2",
+    "name": "Erba canina (Cynodon dactylon)",
+    "type": "Inalanti",
+    "siss_code": "0090681.A1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - g2 - Erba canina"
+  },
+  {
+    "code": "g6",
+    "name": "Coda di topo (Phleum pratense)",
+    "type": "Inalanti",
+    "siss_code": "0090681.A5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - g6 - Coda di topo"
+  },
+  {
+    "code": "k75",
+    "name": "ISOCIANATO TDI",
+    "type": "Inalanti",
+    "siss_code": "0090681.T1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k75 - Isocianato TDI"
+  },
+  {
+    "code": "k76",
+    "name": "ISOCIANATO MDI",
+    "type": "Inalanti",
+    "siss_code": "0090681.T2",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k76 - Isocianato MDI"
+  },
+  {
+    "code": "k77",
+    "name": "ISOCIANATO HDI",
+    "type": "Inalanti",
+    "siss_code": "0090681.T3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k77 - Isocianato HDI"
+  },
+  {
+    "code": "k78",
+    "name": "Ossido di etilene",
+    "type": "Inalanti",
+    "siss_code": "0090681.T4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k78 - Ossido di etilene"
+  },
+  {
+    "code": "k79",
+    "name": "Anidride ftalica",
+    "type": "Inalanti",
+    "siss_code": "0090681.T5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k79 - Anidride ftalica"
+  },
+  {
+    "code": "k80",
+    "name": "Formalina/Formaldeide",
+    "type": "Inalanti",
+    "siss_code": "0090681.T6",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k80 - Formaldeide/Formalina"
+  },
+  {
+    "code": "k82",
+    "name": "Lattice",
+    "type": "Inalanti",
+    "siss_code": "0090681.T7",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - k82 - Lattice"
+  },
+  {
+    "code": "m1",
+    "name": "Penicillium notatum",
+    "type": "Inalanti",
+    "siss_code": "0090681.D2",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - m1 - Penicil. chrysogenum (P. notatum)"
+  },
+  {
+    "code": "m2",
+    "name": "Cladosporium Herbarum",
+    "type": "Inalanti",
+    "siss_code": "0090681.D3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - m2 - Cladosporium herbarum"
+  },
+  {
+    "code": "m207",
+    "name": "Aspergillus niger",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "m3",
+    "name": "Aspergillus fumigatus",
+    "type": "Inalanti",
+    "siss_code": "0090681.D4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - m3 - Aspergillus fumigatus"
+  },
+  {
+    "code": "m4",
+    "name": "Mucor Racemosus",
+    "type": "Inalanti",
+    "siss_code": "0090681.D5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - m4 - Mucor racemosus"
+  },
+  {
+    "code": "m5",
+    "name": "Candida Albicans",
+    "type": "Inalanti",
+    "siss_code": "0090681.D6",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - m5 - Candida Albicans"
+  },
+  {
+    "code": "m6",
+    "name": "Alternaria alternata",
+    "type": "Inalanti",
+    "siss_code": "0090681.D7",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - m6 - Alternaria alternata"
+  },
+  {
+    "code": "Rm209",
+    "name": "Penicillum glabrum",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rt213",
+    "name": "Pino (Pinus radiata)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "t1",
+    "name": "Acero (Acer negundo)",
+    "type": "Inalanti",
+    "siss_code": "0090681.E2",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t1 - Acero"
+  },
+  {
+    "code": "t11",
+    "name": "Platano (Platanus acerifolia)",
+    "type": "Inalanti",
+    "siss_code": "0090681.F1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t11 - Platano"
+  },
+  {
+    "code": "t14",
+    "name": "Pioppo (Populus deltoides)",
+    "type": "Inalanti",
+    "siss_code": "0090681.F3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t14 - Pioppo"
+  },
+  {
+    "code": "t203",
+    "name": "Ippocastano (Aesculus hippocastanum)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "Rt206",
+    "name": "Castagno (Castanea sativa)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "t208",
+    "name": "Tiglio (Tilia cordata)",
+    "type": "Inalanti",
+    "siss_code": "0090681.F8",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t208 - Tiglio"
+  },
+  {
+    "code": "t212",
+    "name": "Cedro (Libocedrus decurrens)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "t23",
+    "name": "Cipresso mediterraneo (Cupressus sempervirens)",
+    "type": "Inalanti",
+    "siss_code": "0090681.F7",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t23 - Cipresso mediterraneo"
+  },
+  {
+    "code": "t3",
+    "name": "Betulla (Betula verrucosa)",
+    "type": "Inalanti",
+    "siss_code": "0090681.E4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t3 - Betulla"
+  },
+  {
+    "code": "t4",
+    "name": "Nocciolo (Corylus avellana)",
+    "type": "Inalanti",
+    "siss_code": "0090681.E5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t4 - Nocciolo"
+  },
+  {
+    "code": "t5",
+    "name": "Faggio americano (Fagus grandifolia)",
+    "type": "Inalanti",
+    "siss_code": "0090681.E6",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t5 - Faggio americano"
+  },
+  {
+    "code": "t8",
+    "name": "Olmo americano (Ulmus americana)",
+    "type": "Inalanti",
+    "siss_code": "0090681.E9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t8 - Olmo americano"
+  },
+  {
+    "code": "t9",
+    "name": "Olivo (Olea europaea)",
+    "type": "Inalanti",
+    "siss_code": "0090681.F0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - t9 - Olivo"
+  },
+  {
+    "code": "w1",
+    "name": "Ambrosia comune artemisiifolia (Ambrosia elator)",
+    "type": "Inalanti",
+    "siss_code": "0090681.F9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - w01 - Ambrosia comune"
+  },
+  {
+    "code": "w10",
+    "name": "Farinaccio selvatico (Chenopodium album)",
+    "type": "Inalanti",
+    "siss_code": "0090681.G7",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - w10 - Farinaccio selvatico"
+  },
+  {
+    "code": "w12",
+    "name": "Verga d'oro (Solidago virgaurea)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "w204",
+    "name": "Girasole (Helianthus annuus)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "w21",
+    "name": "Parietaria judaica",
+    "type": "Inalanti",
+    "siss_code": "0090681.G9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - w21 - Parietaria judaica"
+  },
+  {
+    "code": "w45",
+    "name": "Erba medica (Medicago sativa)",
+    "type": "Inalanti",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "w6",
+    "name": "Assenzio selvatico (Artemisia vulgaris)",
+    "type": "Inalanti",
+    "siss_code": "0090681.G3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - w06 - Assenzio selvatico"
+  },
+  {
+    "code": "w8",
+    "name": "Dente di leone (Taraxacum volgare)",
+    "type": "Inalanti",
+    "siss_code": "0090681.G5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - w08 - Tarassaco comune"
+  },
+  {
+    "code": "w9",
+    "name": "Lanciuola (Plantago lanceolata)",
+    "type": "Inalanti",
+    "siss_code": "0090681.G6",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - w09 - Lanciuola"
+  },
+  {
+    "code": "i1",
+    "name": "Ape (Apis mellifera)",
+    "type": "Veleni",
+    "siss_code": "0090681.S0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i1 - Ape"
+  },
+  {
+    "code": "i2",
+    "name": "Calabrone bianco (Dolichovespula maculata)",
+    "type": "Veleni",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "i204",
+    "name": "Tafano (Tabanus spp.)",
+    "type": "Veleni",
+    "siss_code": "0090681.S9",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i204 - Tafano"
+  },
+  {
+    "code": "i205",
+    "name": "Bombo (Bombus terrestris)",
+    "type": "Veleni",
+    "siss_code": "0090681.T0",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i205 - Bombo"
+  },
+  {
+    "code": "i3",
+    "name": "Giallone (Vespula spp.)",
+    "type": "Veleni",
+    "siss_code": "0090681.S1",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i3 - Vespula spp (giallone)"
+  },
+  {
+    "code": "i4",
+    "name": "Vespa (Polistes spp.)",
+    "type": "Veleni",
+    "siss_code": "0090681.00",
+    "siss_description": "IGE SPEC. ALLERGOLOGICHE QUANT. SINGOLO ALLERGENE (<5)"
+  },
+  {
+    "code": "i5",
+    "name": "Calabrone giallo (Dolichovespula arenaria)",
+    "type": "Veleni",
+    "siss_code": "0090681.S2",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i5 - Dolichovesp. aren. (calabr. giallo)"
+  },
+  {
+    "code": "i6",
+    "name": "Scarafaggio (Blatella germanica)",
+    "type": "Veleni",
+    "siss_code": "0090681.S3",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i6 - Scarafaggio (Blatella germanica)"
+  },
+  {
+    "code": "i70",
+    "name": "Formica (Solenopsis invicta)",
+    "type": "Veleni",
+    "siss_code": "0090681.S4",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i70 - Formica (Solenopsis invicta)"
+  },
+  {
+    "code": "i71",
+    "name": "Zanzara comune (Aedes communis)",
+    "type": "Veleni",
+    "siss_code": "0090681.S5",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i71 - Zanzara comune"
+  },
+  {
+    "code": "i75",
+    "name": "Calabrone europeo (Vespa crabro)",
+    "type": "Veleni",
+    "siss_code": "0090681.S7",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i75 - Vespa crabro (calabrone europeo)"
+  },
+  {
+    "code": "i77",
+    "name": "Vespa europea (Polistes dominulus)",
+    "type": "Veleni",
+    "siss_code": "0090681.S8",
+    "siss_description": "IGE SPEC.ALLERG.QUANT. (<5) - i77 - Polistes dominulus (vespa europea)"
+  }
+]
