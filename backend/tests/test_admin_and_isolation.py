@@ -11,8 +11,23 @@ if not BASE_URL:
             if line.startswith('REACT_APP_BACKEND_URL='):
                 BASE_URL = line.split('=', 1)[1].strip().rstrip('/')
 
-ADMIN_EMAIL = "duilbrugn@gmail.com"
-ADMIN_PASSWORD = "AllergoLab2026!"
+def _admin_credential(key, default=""):
+    """Read admin credentials from env, falling back to backend/.env (no hardcoded secrets)."""
+    value = os.environ.get(key)
+    if value:
+        return value
+    try:
+        with open('/app/backend/.env') as f:
+            for line in f:
+                if line.startswith(key + '='):
+                    return line.split('=', 1)[1].strip().strip('"')
+    except OSError:
+        pass
+    return default
+
+
+ADMIN_EMAIL = _admin_credential("ADMIN_EMAIL")
+ADMIN_PASSWORD = _admin_credential("ADMIN_PASSWORD")
 
 
 @pytest.fixture(scope="module")

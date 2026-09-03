@@ -97,42 +97,50 @@ def public_user(doc: dict) -> dict:
     }
 
 
-async def get_current_user(request: Request) -> dict:
-    # 1) JWT access token (cookie or Bearer)
-    token = request.cookies.get("access_token")
+def _bearer_token(request: Request):
+    auth_header = request.headers.get("Authorization", "")
+    return auth_header[7:] if auth_header.startswith("Bearer ") else None
+
+
+async def _user_from_jwt(token):
     if not token:
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header[7:]
-    if token:
-        try:
-            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-            if payload.get("type") == "access":
-                user = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
-                if user:
-                    return user
-        except jwt.PyJWTError:
-            pass
+        return None
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except jwt.PyJWTError:
+        return None
+    if payload.get("type") != "access":
+        return None
+    return await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
 
-    # 2) Emergent Google session token (cookie or Bearer)
-    session_token = request.cookies.get("session_token")
-    if not session_token:
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            session_token = auth_header[7:]
-    if session_token:
-        session = await db.user_sessions.find_one({"session_token": session_token}, {"_id": 0})
-        if session:
-            expires_at = session["expires_at"]
-            if isinstance(expires_at, str):
-                expires_at = datetime.fromisoformat(expires_at)
-            if expires_at.tzinfo is None:
-                expires_at = expires_at.replace(tzinfo=timezone.utc)
-            if expires_at >= datetime.now(timezone.utc):
-                user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
-                if user:
-                    return user
 
+def _session_active(session) -> bool:
+    expires_at = session["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    return expires_at >= datetime.now(timezone.utc)
+
+
+async def _user_from_session(token):
+    if not token:
+        return None
+    session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+    if not session or not _session_active(session):
+        return None
+    return await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
+
+
+async def get_current_user(request: Request) -> dict:
+    # 1) JWT access token (cookie o Bearer)
+    user = await _user_from_jwt(request.cookies.get("access_token") or _bearer_token(request))
+    if user:
+        return user
+    # 2) Token di sessione Google gestito da Emergent (cookie o Bearer)
+    user = await _user_from_session(request.cookies.get("session_token") or _bearer_token(request))
+    if user:
+        return user
     raise HTTPException(status_code=401, detail="Non autenticato")
 
 

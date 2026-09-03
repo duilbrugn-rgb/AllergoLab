@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import api from "../lib/api";
 
 const AuthContext = createContext(null);
@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
       const { data } = await api.get("/auth/me");
       setUser(data);
     } catch {
+      // 401 quando non autenticato: stato normale, nessun utente in sessione
       setUser(null);
     } finally {
       setLoading(false);
@@ -27,20 +28,21 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, [checkAuth]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout");
-    } catch {
-      /* ignore */
+    } catch (error) {
+      console.error("Errore durante il logout:", error);
     }
     setUser(null);
-  };
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, loading, checkAuth, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, setUser, loading, checkAuth, logout }),
+    [user, loading, checkAuth, logout]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
