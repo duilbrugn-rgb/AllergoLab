@@ -26,6 +26,51 @@ function chunk(arr, size) {
   return out;
 }
 
+// Distribuisce i codici SISS su ricette con al massimo `maxPerRicetta` prestazioni ciascuna
+function distribuisciRicette(codes, maxPerRicetta = 8) {
+  const ricette = [];
+  let current = [];
+  let cap = maxPerRicetta;
+  for (const c of codes) {
+    let q = c.quantity;
+    while (q > 0) {
+      const take = Math.min(q, cap);
+      current.push({ siss_code: c.siss_code, description: c.description, quantity: take });
+      cap -= take;
+      q -= take;
+      if (cap === 0) {
+        ricette.push(current);
+        current = [];
+        cap = maxPerRicetta;
+      }
+    }
+  }
+  if (current.length) ricette.push(current);
+  return ricette;
+}
+
+function RicetteBox({ ricette }) {
+  if (!ricette.length) return null;
+  return (
+    <div className="pb-ricette" data-testid="report-ricette-distribution">
+      <p className="pb-ricette-title">Distribuzione su ricette (max 8 prestazioni per ricetta)</p>
+      <ol className="pb-ricette-list">
+        {ricette.map((r, i) => (
+          <li key={i} className="pb-ricetta">
+            <span className="pb-ricetta-label">Ricetta {i + 1}:</span>{" "}
+            {r.map((it, j) => (
+              <span key={j} className="pb-ricetta-item">
+                <span className="pb-mono">{it.siss_code}</span> × {it.quantity}
+                {j < r.length - 1 ? "  ·  " : ""}
+              </span>
+            ))}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function ReportHeader({ page, total }) {
   return (
     <div className="ph-header">
@@ -78,6 +123,11 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
     items: selectedItems.filter((a) => a.type === type),
   })).filter((g) => g.items.length);
 
+  const ricette = useMemo(
+    () => (aggregation?.codes?.length ? distribuisciRicette(aggregation.codes) : []),
+    [aggregation]
+  );
+
   // Costruisce i blocchi impaginabili del report da stampare
   const blocks = useMemo(() => {
     const list = [];
@@ -124,6 +174,13 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
             </table>
           </div>
         ),
+      });
+    }
+
+    if (aggregation?.codes?.length > 0) {
+      list.push({
+        key: "ricette",
+        el: <RicetteBox ricette={ricette} />,
       });
     }
 
@@ -177,7 +234,7 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
 
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localPatient, localDoctor, notes, selectedCodes.join(","), aggregation]);
+  }, [localPatient, localDoctor, notes, selectedCodes.join(","), aggregation, ricette]);
 
   // Impagina i blocchi in pagine A4 in base all'altezza misurata
   useLayoutEffect(() => {
@@ -297,6 +354,12 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {ricette.length > 0 && (
+            <div className="mb-6">
+              <RicetteBox ricette={ricette} />
             </div>
           )}
 

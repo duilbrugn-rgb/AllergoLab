@@ -146,6 +146,37 @@
   color: #0f172a;
   padding: 8px 0 2px;
 }
+.pb-ricette {
+  border: 2px solid #6ee7b7;
+  background: #ecfdf5;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 10px 0;
+}
+.pb-ricette-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 6px;
+}
+.pb-ricette-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pb-ricetta {
+  font-size: 13px;
+  color: #334155;
+  padding: 3px 0;
+  border-top: 1px solid #d1fae5;
+}
+.pb-ricetta:first-child {
+  border-top: none;
+}
+.pb-ricetta-label {
+  font-weight: 700;
+  color: #065f46;
+}
 .pb-group { margin-bottom: 10px; }
 .pb-group-title {
   font-size: 10px;
