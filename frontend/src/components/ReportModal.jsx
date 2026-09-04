@@ -169,7 +169,7 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
       key: "sign",
       el: (
         <div className="pb-sign">
-          <div className="pb-sign-generated">Documento generato da AllergoLab</div>
+          <div />
           <div className="pb-sign-line">Firma del medico</div>
         </div>
       ),
