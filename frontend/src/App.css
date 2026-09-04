@@ -2,6 +2,216 @@
   min-height: 100vh;
 }
 
+/* ===== Intestazione report (schermo + stampa) ===== */
+.ph-header {
+  display: grid;
+  grid-template-columns: 1fr 1.7fr 1fr;
+  border-top: 1px solid #9ca3af;
+  border-bottom: 1px solid #9ca3af;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.ph-col {
+  display: flex;
+  flex-direction: column;
+}
+.ph-col-logo {
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+}
+.ph-col-logo img {
+  max-height: 62px;
+  width: auto;
+}
+.ph-col-title {
+  text-align: center;
+}
+.ph-title-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+}
+.ph-title {
+  font-weight: 700;
+  color: #374151;
+  font-size: 18px;
+  line-height: 1.15;
+}
+.ph-title-sub {
+  font-weight: 700;
+  color: #374151;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.ph-modulo {
+  text-align: center;
+  border-top: 1px solid #d1d5db;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #9ca3af;
+  padding: 5px 0;
+}
+.ph-col-meta {
+  text-align: center;
+}
+.ph-mod-code {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #374151;
+  font-size: 13px;
+  padding: 8px 6px;
+}
+.ph-meta-row {
+  border-top: 1px solid #d1d5db;
+  font-size: 12px;
+  color: #4b5563;
+  padding: 5px 6px;
+}
+
+/* ===== Blocchi del documento di stampa ===== */
+.pb-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 14px 0 6px;
+}
+.pb-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 3px;
+}
+.pb-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: #0f172a;
+}
+.pb-sub {
+  font-size: 13px;
+  color: #475569;
+}
+.pb-siss {
+  border: 2px solid #7dd3fc;
+  background: #f0f9ff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 10px 0;
+}
+.pb-siss-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0c4a6e;
+  margin-bottom: 6px;
+}
+.pb-siss-table {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+}
+.pb-siss-table th {
+  text-align: left;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0369a1;
+  border-bottom: 1px solid #bae6fd;
+  padding: 4px 8px 4px 0;
+}
+.pb-siss-table td {
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid #e0f2fe;
+  color: #334155;
+}
+.pb-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  color: #0c4a6e;
+}
+.pb-right { text-align: right; }
+.pb-bold { font-weight: 700; color: #0f172a; }
+.pb-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  padding: 8px 0 2px;
+}
+.pb-group { margin-bottom: 10px; }
+.pb-group-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 3px;
+}
+.pb-group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 2px;
+}
+.pb-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: #1e293b;
+}
+.pb-item-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: #64748b;
+  width: 44px;
+  flex-shrink: 0;
+}
+.pb-notes { padding: 8px 0; }
+.pb-notes-text {
+  font-size: 13px;
+  color: #334155;
+  white-space: pre-wrap;
+  min-height: 1.2rem;
+}
+.pb-sign {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 28px;
+}
+.pb-sign-generated {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.pb-sign-line {
+  width: 208px;
+  border-top: 1px solid #94a3b8;
+  padding-top: 4px;
+  font-size: 12px;
+  color: #475569;
+  text-align: center;
+}
+
+/* Nascondi il contenitore di misura e il documento di stampa a schermo */
+#print-measure {
+  position: absolute;
+  left: -100000px;
+  top: 0;
+  width: 182mm;
+  visibility: hidden;
+  pointer-events: none;
+}
+#print-document {
+  display: none;
+}
+
 @media print {
   html, body {
     background: #fff !important;
@@ -10,46 +220,50 @@
     height: auto !important;
   }
 
-  /* Nascondi l'intera app e gli overlay: il modale report e' portalizzato in <body> */
+  /* Nascondi app, overlay, modale e contenitore di misura */
   #root,
   [data-sonner-toaster],
-  .fixed.inset-0 {
+  [role="dialog"],
+  .fixed.inset-0,
+  #print-measure {
     display: none !important;
   }
 
-  /* Riporta il Dialog Radix nel normale flusso di pagina */
-  [role="dialog"] {
-    position: static !important;
-    transform: none !important;
-    inset: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-    background: #fff !important;
-    margin: 0 !important;
-    gap: 0 !important;
+  /* Mostra il documento di stampa impaginato */
+  #print-document {
+    display: block !important;
   }
 
-  /* Elementi non stampabili: toolbar, campi di editing, pulsante chiudi */
-  .no-print,
-  [role="dialog"] > button {
-    display: none !important;
+  @page {
+    size: A4;
+    margin: 0;
   }
 
-  #allergolab-report {
-    position: static !important;
-    width: 100% !important;
-    padding: 16px 24px !important;
-    box-shadow: none !important;
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 12mm 14mm;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+    break-after: page;
+  }
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 
-  /* Evita interruzioni di pagina indesiderate all'interno delle tabelle */
+  .print-body {
+    flex: 1;
+    margin-top: 6mm;
+  }
+
+  .pb-siss,
+  .pb-group,
+  .pb-info,
   table, tr, td, th {
     page-break-inside: avoid;
+    break-inside: avoid;
   }
 }

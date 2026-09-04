@@ -58,3 +58,14 @@ App web "AllergoLab" per selezionare allergeni e creare un promemoria/report da 
 - [x] UI utente: pannello "Profili di allergeni" (ProfileSelector) nel tab Nuovo Report; "Vedi" mostra gli allergeni contenuti, "Aggiungi" li sposta tutti a destra (senza duplicati); l'utente può poi deselezionare i singoli. Aggregazione SISS invariata.
 - [x] Cancellazione automatica report >10 giorni: cron giornaliero (.emergent/crons.yml, 03:00 UTC) -> POST /api/cron/purge-old-reports (Bearer WEBHOOK_CRON_SECRET, hmac.compare_digest, BackgroundTasks); elimina report con created_at < now-10gg.
 - [x] Testing agent: 100% (backend 14/14, frontend).
+
+
+## Aggiornamento (2026-06 · iterazione 8) — Intestazione stampa report
+- [x] Nuova intestazione report conforme al modulo aziendale: griglia a 3 colonne SENZA righe verticali (solo linee orizzontali).
+  - Sinistra: logo Regione Lombardia (/frontend/public/logo-regione.jpg).
+  - Centro: titolo "ALLERGENI / PER DETERMINAZIONE / IgE SPECIFICHE (RAST)" + "MODULO".
+  - Destra: Mod-LABCENT13.08.01.01, PAGINA: X DI X (dinamico), REVISIONE: 00, DATA: 04/09/2026 (fissa).
+- [x] Stampa impaginata A4 (JS pagination in ReportModal.jsx): contenuto suddiviso in blocchi misurati e distribuito su piu' pagine; l'intestazione si ripete su OGNI pagina con numero pagina corretto.
+- [x] File: /app/frontend/src/components/ReportModal.jsx (ReportHeader + #print-document/#print-measure via portal), /app/frontend/src/App.css (stili .ph-* / .pb-* + @media print @page A4).
+- [x] Verificato via screenshot (media screen + print): header identico al modello, pagine "1 DI 6", "2 DI 6"... corrette.
+- Note: valori codice modulo/revisione/data fissi nel codice (richiesta utente). Logo caricato dall'utente.
