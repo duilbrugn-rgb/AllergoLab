@@ -30,8 +30,8 @@ db = client[os.environ['DB_NAME']]
 
 JWT_SECRET = os.environ['JWT_SECRET']
 JWT_ALGORITHM = "HS256"
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@allergolab.it')
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+ADMIN_EMAIL = os.environ['ADMIN_EMAIL']
+ADMIN_PASSWORD = os.environ['ADMIN_PASSWORD']
 CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 EMERGENT_SESSION_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
 WEBHOOK_CRON_SECRET = os.environ.get('WEBHOOK_CRON_SECRET', '')
@@ -97,9 +97,9 @@ def create_refresh_token(user_id: str) -> str:
 
 def set_auth_cookies(response: Response, access: str, refresh: str):
     response.set_cookie("access_token", access, httponly=True, secure=True,
-                        samesite="none", max_age=12 * 3600, path="/")
+                        samesite="lax", max_age=12 * 3600, path="/")
     response.set_cookie("refresh_token", refresh, httponly=True, secure=True,
-                        samesite="none", max_age=7 * 24 * 3600, path="/")
+                        samesite="lax", max_age=7 * 24 * 3600, path="/")
 
 
 def public_user(doc: dict) -> dict:
@@ -281,7 +281,7 @@ async def refresh_token_endpoint(request: Request, response: Response):
             raise HTTPException(status_code=401, detail="Utente non trovato")
         access = create_access_token(user["user_id"], user["email"])
         response.set_cookie("access_token", access, httponly=True, secure=True,
-                            samesite="none", max_age=12 * 3600, path="/")
+                            samesite="lax", max_age=12 * 3600, path="/")
         return {"ok": True}
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Token non valido")
@@ -333,7 +333,7 @@ async def google_session(response: Response, x_session_id: str = Header(None)):
         upsert=True,
     )
     response.set_cookie("session_token", session_token, httponly=True, secure=True,
-                        samesite="none", max_age=7 * 24 * 3600, path="/")
+                        samesite="lax", max_age=7 * 24 * 3600, path="/")
     return public_user(user)
 
 
@@ -570,10 +570,20 @@ async def startup():
     await db.user_sessions.create_index("session_token")
     await db.reports.create_index("user_id")
     await db.allergens.create_index("code", unique=True)
-    if await db.allergens.count_documents({}) == 0:
-        await db.allergens.insert_many([dict(a) for a in SEED_ALLERGENS])
-        logger.info("Seeded %d allergens", len(SEED_ALLERGENS))
-    # Seed admin/owner
+
+    inserted = 0
+    for allergen in SEED_ALLERGENS:
+        result = await db.allergens.update_one(
+            {"code": allergen["code"]},
+            {"$setOnInsert": dict(allergen)},
+            upsert=True,
+        )
+        if result.upserted_id is not None:
+            inserted += 1
+
+    if inserted:
+        logger.info("Seeded %d allergens", inserted)
+
     existing = await db.users.find_one({"email": ADMIN_EMAIL.lower()})
     if existing is None:
         await db.users.insert_one({
@@ -589,10 +599,6 @@ async def startup():
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
         logger.info("Admin seeded: %s", ADMIN_EMAIL)
-    elif existing.get("password_hash") and not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-        await db.users.update_one({"email": ADMIN_EMAIL.lower()},
-                                  {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}})
-
 
 @app.on_event("shutdown")
 async def shutdown():
