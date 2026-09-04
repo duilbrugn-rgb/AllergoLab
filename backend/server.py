@@ -14,8 +14,9 @@ from typing import List, Optional
 
 import bcrypt
 import jwt
+import hmac
 import requests
-from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends, Header
+from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends, Header, BackgroundTasks
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, EmailStr, Field
@@ -33,6 +34,8 @@ ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@allergolab.it')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 EMERGENT_SESSION_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
+WEBHOOK_CRON_SECRET = os.environ.get('WEBHOOK_CRON_SECRET', '')
+REPORT_RETENTION_DAYS = 10
 
 # Seed source for the allergen dataset (loaded into MongoDB on startup)
 with open(ROOT_DIR / 'allergens.json', 'r', encoding='utf-8') as f:
@@ -206,6 +209,12 @@ class AllergenInput(BaseModel):
 
 class RoleUpdate(BaseModel):
     role: str
+
+
+class ProfileInput(BaseModel):
+    name: str = Field(min_length=1)
+    description: str = ""
+    allergen_codes: List[str]
 
 
 # --- Auth endpoints ---
@@ -474,6 +483,68 @@ async def admin_update_role(user_id: str, data: RoleUpdate, user: dict = Depends
     await db.users.update_one({"user_id": user_id}, {"$set": {"role": data.role}})
     target["role"] = data.role
     return public_user(target)
+
+
+# --- Profili di allergeni (bundle non modificabili dall'utente) ---
+@api_router.get("/profiles")
+async def list_profiles(user: dict = Depends(get_current_user)):
+    return await db.profiles.find({}, {"_id": 0}).sort("name", 1).to_list(500)
+
+
+@api_router.post("/admin/profiles")
+async def admin_create_profile(data: ProfileInput, user: dict = Depends(get_admin_user)):
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {
+        "profile_id": f"prof_{uuid.uuid4().hex[:12]}",
+        "name": data.name.strip(),
+        "description": data.description.strip(),
+        "allergen_codes": data.allergen_codes,
+        "created_by": user.get("name") or user.get("email"),
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.profiles.insert_one(dict(doc))
+    return doc
+
+
+@api_router.put("/admin/profiles/{profile_id}")
+async def admin_update_profile(profile_id: str, data: ProfileInput, user: dict = Depends(get_admin_user)):
+    if not await db.profiles.find_one({"profile_id": profile_id}):
+        raise HTTPException(status_code=404, detail="Profilo non trovato")
+    await db.profiles.update_one({"profile_id": profile_id}, {"$set": {
+        "name": data.name.strip(),
+        "description": data.description.strip(),
+        "allergen_codes": data.allergen_codes,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }})
+    return await db.profiles.find_one({"profile_id": profile_id}, {"_id": 0})
+
+
+@api_router.delete("/admin/profiles/{profile_id}")
+async def admin_delete_profile(profile_id: str, user: dict = Depends(get_admin_user)):
+    res = await db.profiles.delete_one({"profile_id": profile_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Profilo non trovato")
+    return {"ok": True}
+
+
+# --- Cron: cancellazione report in archivio piu' vecchi di 10 giorni ---
+async def _purge_old_reports():
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=REPORT_RETENTION_DAYS)).isoformat()
+    res = await db.reports.delete_many({"created_at": {"$lt": cutoff}})
+    logger.info("Cron purge: eliminati %d report piu' vecchi di %d giorni",
+                res.deleted_count, REPORT_RETENTION_DAYS)
+
+
+@api_router.post("/cron/purge-old-reports")
+async def cron_purge_old_reports(request: Request, background_tasks: BackgroundTasks):
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:] if auth.startswith("Bearer ") else ""
+    if not WEBHOOK_CRON_SECRET or not hmac.compare_digest(token, WEBHOOK_CRON_SECRET):
+        raise HTTPException(status_code=401, detail="Non autorizzato")
+    background_tasks.add_task(_purge_old_reports)
+    return {"accepted": True}
 
 
 @api_router.get("/")

@@ -1,0 +1,8 @@
+crons:
+  - name: purge-old-reports
+    description: "Elimina ogni giorno i report in archivio piu' vecchi di 10 giorni"
+    cron: "0 3 * * *"
+    endpoint: "{{BASE_URL}}/api/cron/purge-old-reports"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true

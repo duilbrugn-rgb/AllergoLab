@@ -50,3 +50,11 @@ App web "AllergoLab" per selezionare allergeni e creare un promemoria/report da 
 - [x] Gestione ruoli: GET /api/admin/users e PUT /api/admin/users/{id}/role (admin-only). L'admin promuove/rimuove admin; blocco self-role (400), ruolo invalido (400), utente inesistente (404).
 - [x] UI: tab "Configurazione" con sotto-tab Catalogo / Utenti / Registro modifiche; stati di caricamento.
 - [x] Testing agent: 100% (backend 41/41, frontend).
+
+
+## Aggiornamento (2026-06 · iterazione 7)
+- [x] Profili di allergeni (bundle): collezione db.profiles; GET /api/profiles (tutti gli utenti autenticati), POST/PUT/DELETE /api/admin/profiles (admin-only).
+- [x] UI admin: sotto-tab "Profili" in Configurazione (AdminProfiles) con picker allergeni + chip; crea/modifica/elimina.
+- [x] UI utente: pannello "Profili di allergeni" (ProfileSelector) nel tab Nuovo Report; "Vedi" mostra gli allergeni contenuti, "Aggiungi" li sposta tutti a destra (senza duplicati); l'utente può poi deselezionare i singoli. Aggregazione SISS invariata.
+- [x] Cancellazione automatica report >10 giorni: cron giornaliero (.emergent/crons.yml, 03:00 UTC) -> POST /api/cron/purge-old-reports (Bearer WEBHOOK_CRON_SECRET, hmac.compare_digest, BackgroundTasks); elimina report con created_at < now-10gg.
+- [x] Testing agent: 100% (backend 14/14, frontend).

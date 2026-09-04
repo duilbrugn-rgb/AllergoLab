@@ -1,0 +1,22 @@
+{
+  "summary": "Verified new AllergoLab features: (1) Admin profile CRUD via 'Configurazione > Profili' with allergen picker/chips; (2) User panel 'Profili di allergeni' in 'Nuovo Report' with 'Vedi' dialog listing allergens (code/type/name) and 'Aggiungi' button moving all codes into selected list; (3) Re-adding same profile does NOT duplicate; (4) Individual allergens can be removed via remove-allergen-<code>; (5) Cron endpoint POST /api/cron/purge-old-reports enforces Bearer WEBHOOK_CRON_SECRET (401 on missing/wrong, 200 with background task on correct) and preserves recent reports; (6) RBAC on /api/admin/profiles (401 unauthenticated, 403 non-admin) and /api/profiles (401 unauth, 200 for any authed user). Backend pytest: 14/14 passed. Frontend Playwright flow: 100% passed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_profiles_and_cron.py",
+    "/app/test_reports/pytest/profiles_cron.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py is 599 lines and starting to accumulate concerns (auth + allergens + reports + profiles + cron). Consider splitting into routers/modules before it grows further.",
+    "Cron endpoint correctly uses hmac.compare_digest and BackgroundTasks; no changes needed.",
+    "ProfileSelector correctly dedupes via selectedSet before appending -> re-adding same profile produces no duplicates (verified)."
+  ],
+  "updated_files": ["/app/backend/tests/test_profiles_and_cron.py"],
+  "success_rate": {"backend": "100% (14/14)", "frontend": "100%"},
+  "test_credentials": "duilbrugn@gmail.com / AllergoLab2026!",
+  "seed_data_creation": "All test data (zTEST profiles and reports) cleaned up in-test.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Profiles feature + cron purge are fully working. Test file /app/backend/tests/test_profiles_and_cron.py covers RBAC, CRUD, cron 401/200, and confirms recent reports are preserved after cron (background task is not blocking). UI: subtab-profili contains AdminProfiles CRUD; ProfileSelector appears in Nuovo Report between PatientForm and DualList when profiles>0."
+}

@@ -9,6 +9,8 @@ import ReportModal from "../components/ReportModal";
 import AdminAllergens from "../components/AdminAllergens";
 import AdminUsers from "../components/AdminUsers";
 import AuditLog from "../components/AuditLog";
+import AdminProfiles from "../components/AdminProfiles";
+import ProfileSelector from "../components/ProfileSelector";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
@@ -18,6 +20,7 @@ import { useAuth } from "../context/AuthContext";
 export default function AppPage() {
   const { user } = useAuth();
   const [allergens, setAllergens] = useState([]);
+  const [profiles, setProfiles] = useState([]);
   const [selectedCodes, setSelectedCodes] = useState([]);
   const [patient, setPatient] = useState({ first_name: "", last_name: "", dob: "" });
   const [doctorName, setDoctorName] = useState(user?.name || "");
@@ -34,10 +37,15 @@ export default function AppPage() {
     api.get("/reports").then((r) => setHistory(r.data)).catch(() => {});
   }, []);
 
+  const loadProfiles = useCallback(() => {
+    api.get("/profiles").then((r) => setProfiles(r.data)).catch(() => {});
+  }, []);
+
   useEffect(() => {
     loadAllergens();
     loadHistory();
-  }, [loadAllergens, loadHistory]);
+    loadProfiles();
+  }, [loadAllergens, loadHistory, loadProfiles]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -108,6 +116,8 @@ export default function AppPage() {
           <TabsContent value="nuovo" className="space-y-6">
             <PatientForm patient={patient} setPatient={setPatient} doctorName={doctorName} setDoctorName={setDoctorName} />
 
+            <ProfileSelector profiles={profiles} allergens={allergens} selectedCodes={selectedCodes} setSelectedCodes={setSelectedCodes} />
+
             <DualList allergens={allergens} selectedCodes={selectedCodes} setSelectedCodes={setSelectedCodes} />
 
             <SissSummary aggregation={aggregation} />
@@ -164,11 +174,15 @@ export default function AppPage() {
               <Tabs defaultValue="catalogo" className="w-full">
                 <TabsList className="mb-4">
                   <TabsTrigger value="catalogo" data-testid="subtab-catalogo">Catalogo</TabsTrigger>
+                  <TabsTrigger value="profili" data-testid="subtab-profili">Profili</TabsTrigger>
                   <TabsTrigger value="utenti" data-testid="subtab-utenti">Utenti</TabsTrigger>
                   <TabsTrigger value="registro" data-testid="subtab-registro">Registro modifiche</TabsTrigger>
                 </TabsList>
                 <TabsContent value="catalogo">
                   <AdminAllergens allergens={allergens} onChanged={loadAllergens} />
+                </TabsContent>
+                <TabsContent value="profili">
+                  <AdminProfiles allergens={allergens} profiles={profiles} onChanged={loadProfiles} />
                 </TabsContent>
                 <TabsContent value="utenti">
                   <AdminUsers currentUser={user} />
