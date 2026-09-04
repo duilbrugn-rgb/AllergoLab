@@ -30,7 +30,7 @@ function ReportHeader({ page, total }) {
   return (
     <div className="ph-header">
       <div className="ph-col ph-col-logo">
-        <img src="/logo-regione.jpg" alt="Regione Lombardia" />
+        <img src="/logo-asst.png" alt="ASST Spedali Civili" />
       </div>
       <div className="ph-col ph-col-title">
         <div className="ph-title-main">
