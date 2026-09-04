@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import { Search, X, ChevronRight, ChevronLeft, Trash2, Plus } from "lucide-react";
+import { Search, X, ChevronRight, ChevronLeft, Trash2, ArrowRight } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
 import { Badge } from "./ui/badge";
 import { CATEGORIES, CATEGORY_ORDER } from "../lib/categories";
 
@@ -23,7 +22,6 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
   const [sourceSearch, setSourceSearch] = useState("");
   const [selectedSearch, setSelectedSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
-  const [checked, setChecked] = useState({});
 
   const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
 
@@ -59,19 +57,10 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
       );
   }, [selectedCodes, selectedSearch, allergens]);
 
-  const checkedCodes = filteredSource.filter((a) => checked[a.code]).map((a) => a.code);
-
-  const addSelected = () => {
-    if (!checkedCodes.length) return;
-    setSelectedCodes([...selectedCodes, ...checkedCodes]);
-    setChecked({});
-  };
-
   const addAllVisible = () => {
     const codes = filteredSource.map((a) => a.code);
     if (!codes.length) return;
     setSelectedCodes([...selectedCodes, ...codes]);
-    setChecked({});
   };
 
   const removeOne = (code) => setSelectedCodes(selectedCodes.filter((c) => c !== code));
@@ -137,18 +126,14 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
 
         <div className="flex-1 overflow-y-auto max-h-[52vh] divide-y divide-slate-50">
           {filteredSource.map((a) => (
-            <label
+            <button
               key={a.code}
-              data-testid={`source-allergen-item-${a.code}`}
-              className="flex items-start gap-2.5 px-3 py-2 hover:bg-sky-50/60 cursor-pointer group"
+              type="button"
+              onClick={() => addSingle(a.code)}
+              data-testid={`add-allergen-${a.code}`}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-sky-50 group transition-colors"
             >
-              <Checkbox
-                checked={!!checked[a.code]}
-                onCheckedChange={(v) => setChecked({ ...checked, [a.code]: !!v })}
-                data-testid={`select-allergen-checkbox-${a.code}`}
-                className="mt-0.5"
-              />
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0" data-testid={`source-allergen-item-${a.code}`}>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-semibold text-slate-500">
                     {a.code}
@@ -157,17 +142,13 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
                 </div>
                 <p className="text-sm text-slate-800 truncate">{a.name}</p>
               </div>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  addSingle(a.code);
-                }}
-                className="opacity-0 group-hover:opacity-100 text-sky-600 hover:text-sky-800 transition-opacity"
-                title="Aggiungi"
+              <span
+                className="shrink-0 h-7 w-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 group-hover:bg-sky-600 group-hover:text-white group-hover:border-sky-600 transition-colors"
+                title="Sposta a destra"
               >
-                <Plus className="h-4 w-4" />
-              </button>
-            </label>
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </button>
           ))}
           {!filteredSource.length && (
             <p className="p-6 text-center text-sm text-slate-400">
@@ -176,19 +157,10 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
           )}
         </div>
 
-        <div className="p-2.5 border-t border-slate-100 flex gap-2">
-          <Button
-            size="sm"
-            onClick={addSelected}
-            disabled={!checkedCodes.length}
-            data-testid="btn-add-selected-allergens"
-            className="flex-1 bg-sky-600 hover:bg-sky-700"
-          >
-            Aggiungi selezionati ({checkedCodes.length})
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-          <Button size="sm" variant="outline" onClick={addAllVisible} data-testid="btn-add-all-allergens">
-            Tutti
+        <div className="p-2.5 border-t border-slate-100 flex justify-between items-center gap-2">
+          <span className="text-[11px] text-slate-400 pl-1">Clicca una riga per spostarla a destra →</span>
+          <Button size="sm" variant="outline" onClick={addAllVisible} disabled={!filteredSource.length} data-testid="btn-add-all-allergens">
+            <ChevronRight className="h-4 w-4 mr-1" /> Aggiungi tutti
           </Button>
         </div>
       </div>

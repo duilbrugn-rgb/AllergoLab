@@ -1,0 +1,19 @@
+{
+  "summary": "Frontend-only testing of DualList new click-to-move UX in 'Nuovo Report' tab. Logged in as admin, verified: (1) source rows are clickable buttons with ArrowRight and data-testid add-allergen-<code>; (2) clicking a row (e.g., add-allergen-f1) moves it to selected list (selected-allergen-item-f1 appears), row disappears from source, selected-count increments; (3) NO legacy checkboxes (select-allergen-checkbox-*) nor btn-add-selected-allergens present; (4) search 'latte' filters to 6 and clicking filtered row works; (5) category filter badges work (Alimenti -> 124); (6) remove-allergen-<code> restores allergen to source; (7) btn-add-all-allergens moves all 282 visible; (8) btn-clear-all-selected empties; (9) SISS suggested codes panel updates and btn-preview-report-button opens Anteprima Report modal correctly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "test_credentials": "duilbrugn@gmail.com / AllergoLab2026!",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "New click-to-move UX verified end-to-end; no regressions. DualList.jsx uses <button data-testid=add-allergen-<code>> with ArrowRight icon; footer has btn-add-all-allergens; legacy checkbox testids removed."
+}
