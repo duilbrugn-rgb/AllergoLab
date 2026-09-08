@@ -134,33 +134,14 @@ async def _user_from_jwt(token):
     return await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
 
 
-def _session_active(session) -> bool:
-    expires_at = session["expires_at"]
-    if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(expires_at)
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    return expires_at >= datetime.now(timezone.utc)
-
-
-async def _user_from_session(token):
-    if not token:
-        return None
-    session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
-    if not session or not _session_active(session):
-        return None
-    return await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
-
 
 async def get_current_user(request: Request) -> dict:
-    # 1) JWT access token (cookie o Bearer)
-    user = await _user_from_jwt(request.cookies.get("access_token") or _bearer_token(request))
+    user = await _user_from_jwt(
+        request.cookies.get("access_token") or _bearer_token(request)
+    )
     if user:
         return user
-    # 2) Token di sessione Google gestito da Emergent (cookie o Bearer)
-    user = await _user_from_session(request.cookies.get("session_token") or _bearer_token(request))
-    if user:
-        return user
+
     raise HTTPException(status_code=401, detail="Non autenticato")
 
 
@@ -261,13 +242,9 @@ async def login(data: LoginInput, response: Response):
 
 
 @api_router.post("/auth/logout")
-async def logout(response: Response, request: Request):
+async def logout(response: Response):
     response.delete_cookie("access_token", path="/")
     response.delete_cookie("refresh_token", path="/")
-    session_token = request.cookies.get("session_token")
-    if session_token:
-        await db.user_sessions.delete_one({"session_token": session_token})
-    response.delete_cookie("session_token", path="/")
     return {"ok": True}
 
 
@@ -585,7 +562,6 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
-    await db.user_sessions.create_index("session_token")
     await db.reports.create_index("user_id")
     await db.allergens.create_index("code", unique=True)
 
