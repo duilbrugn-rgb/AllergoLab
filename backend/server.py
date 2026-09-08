@@ -11,7 +11,8 @@ import uuid
 import secrets
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
-
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 import bcrypt
 import jwt
 import hmac
@@ -29,6 +30,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 JWT_SECRET = os.environ['JWT_SECRET']
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 JWT_ALGORITHM = "HS256"
 ADMIN_EMAIL = os.environ['ADMIN_EMAIL']
 ADMIN_PASSWORD = os.environ['ADMIN_PASSWORD']
@@ -180,6 +182,8 @@ class LoginInput(BaseModel):
     email: EmailStr
     password: str
 
+class GoogleLoginInput(BaseModel):
+    credential: str
 
 class PatientInfo(BaseModel):
     first_name: str = ""
@@ -287,26 +291,33 @@ async def refresh_token_endpoint(request: Request, response: Response):
         raise HTTPException(status_code=401, detail="Token non valido")
 
 
-@api_router.post("/auth/google/session")
-async def google_session(response: Response, x_session_id: str = Header(None)):
-    if not x_session_id:
-        raise HTTPException(status_code=400, detail="Session ID mancante")
+@api_router.post("/auth/google")
+async def google_login(data: GoogleLoginInput, response: Response):
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="Google Client ID non configurato")
+
     try:
-        r = requests.get(EMERGENT_SESSION_URL, headers={"X-Session-ID": x_session_id}, timeout=10)
+        payload = id_token.verify_oauth2_token(
+            data.credential,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
     except Exception:
-        raise HTTPException(status_code=502, detail="Errore contattando il servizio di autenticazione")
-    if r.status_code != 200:
-        raise HTTPException(status_code=401, detail="Sessione Google non valida")
-    data = r.json()
-    email = data["email"].lower().strip()
-    name = data.get("name", "") or email.split("@")[0]
-    picture = data.get("picture", "")
-    session_token = data["session_token"]
+        raise HTTPException(status_code=401, detail="Token Google non valido")
+
+    email = (payload.get("email") or "").lower().strip()
+    if not email:
+        raise HTTPException(status_code=401, detail="Email Google non disponibile")
+
+    name = payload.get("name") or email.split("@")[0]
+    picture = payload.get("picture", "")
 
     user = await db.users.find_one({"email": email})
+
     if not user:
         parts = name.split(" ", 1)
         user_id = f"user_{uuid.uuid4().hex[:12]}"
+
         user = {
             "user_id": user_id,
             "email": email,
@@ -319,21 +330,25 @@ async def google_session(response: Response, x_session_id: str = Header(None)):
             "picture": picture,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
+
         await db.users.insert_one(user)
     else:
-        if picture and not user.get("picture"):
-            await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"picture": picture}})
+        updates = {}
 
-    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-    await db.user_sessions.update_one(
-        {"session_token": session_token},
-        {"$set": {"user_id": user["user_id"], "session_token": session_token,
-                  "expires_at": expires_at.isoformat(),
-                  "created_at": datetime.now(timezone.utc).isoformat()}},
-        upsert=True,
-    )
-    response.set_cookie("session_token", session_token, httponly=True, secure=True,
-                        samesite="lax", max_age=7 * 24 * 3600, path="/")
+        if picture and picture != user.get("picture"):
+            updates["picture"] = picture
+
+        if updates:
+            await db.users.update_one(
+                {"user_id": user["user_id"]},
+                {"$set": updates},
+            )
+
+    access = create_access_token(user["user_id"], email)
+    refresh = create_refresh_token(user["user_id"])
+
+    set_auth_cookies(response, access, refresh)
+
     return public_user(user)
 
 
