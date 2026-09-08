@@ -536,15 +536,18 @@ async def _purge_old_reports():
                 res.deleted_count, REPORT_RETENTION_DAYS)
 
 
-@api_router.post("/cron/purge-old-reports")
-async def cron_purge_old_reports(request: Request, background_tasks: BackgroundTasks):
-    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+@api_router.get("/cron/purge-old-reports")
+async def cron_purge_old_reports(request: Request):
     auth = request.headers.get("Authorization", "")
     token = auth[7:] if auth.startswith("Bearer ") else ""
-    if not WEBHOOK_CRON_SECRET or not hmac.compare_digest(token, WEBHOOK_CRON_SECRET):
+
+    cron_secret = os.environ.get("CRON_SECRET") or WEBHOOK_CRON_SECRET
+
+    if not cron_secret or not hmac.compare_digest(token, cron_secret):
         raise HTTPException(status_code=401, detail="Non autorizzato")
-    background_tasks.add_task(_purge_old_reports)
-    return {"accepted": True}
+
+    await _purge_old_reports()
+    return {"ok": True}
 
 
 @api_router.get("/")

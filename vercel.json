@@ -10,6 +10,12 @@
       "entrypoint": "server:app"
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/purge-old-reports",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",
