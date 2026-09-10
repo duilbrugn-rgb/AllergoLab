@@ -10,7 +10,7 @@ import logging
 import uuid
 import secrets
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional
+from typing import List, Optional, Literal
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import bcrypt
@@ -42,6 +42,9 @@ REPORT_RETENTION_DAYS = 10
 # Seed source for the allergen dataset (loaded into MongoDB on startup)
 with open(ROOT_DIR / 'allergens.json', 'r', encoding='utf-8') as f:
     SEED_ALLERGENS = json.load(f)
+
+with open(ROOT_DIR / 'specific_igg.json', 'r', encoding='utf-8') as f:
+    SEED_SPECIFIC_IGG = json.load(f)
 
 ALLERGEN_TYPES = ["Alimenti", "Inalanti", "Farmaci", "Veleni", "Allergeni molecolari"]
 
@@ -102,6 +105,15 @@ def set_auth_cookies(response: Response, access: str, refresh: str):
                         samesite="lax", max_age=12 * 3600, path="/")
     response.set_cookie("refresh_token", refresh, httponly=True, secure=True,
                         samesite="lax", max_age=7 * 24 * 3600, path="/")
+
+
+def resolve_report_type(doc):
+    """Expose missing report_type as 'ige' without mutating stored documents."""
+    if not doc:
+        return doc
+    if not doc.get("report_type"):
+        return {**doc, "report_type": "ige"}
+    return doc
 
 
 def public_user(doc: dict) -> dict:
@@ -178,6 +190,7 @@ class ReportInput(BaseModel):
     allergen_codes: List[str]
     notes: str = ""
     letterhead: str = ""
+    report_type: Literal["ige", "igg"] = "ige"
 
 
 class AggregateInput(BaseModel):
@@ -340,6 +353,11 @@ async def get_allergens(user: dict = Depends(get_current_user)):
     return await db.allergens.find({}, {"_id": 0}).sort("code", 1).to_list(2000)
 
 
+@api_router.get("/specific-igg")
+async def get_specific_igg(user: dict = Depends(get_current_user)):
+    return await db.specific_igg.find({}, {"_id": 0}).sort("dnlab_code", 1).to_list(2000)
+
+
 # --- Aggregation ---
 @api_router.post("/aggregate")
 async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current_user)):
@@ -350,6 +368,11 @@ async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current
 # --- Reports ---
 @api_router.post("/reports")
 async def create_report(data: ReportInput, user: dict = Depends(get_current_user)):
+    if data.report_type == "igg":
+        raise HTTPException(
+            status_code=501,
+            detail="Il salvataggio dei report IgG sarà implementato nella fase successiva",
+        )
     items = await fetch_allergens_by_codes(data.allergen_codes)
     agg = aggregate(items)
     report_id = f"rep_{uuid.uuid4().hex[:12]}"
@@ -363,6 +386,7 @@ async def create_report(data: ReportInput, user: dict = Depends(get_current_user
         "allergen_codes": data.allergen_codes,
         "allergens": items,
         "aggregation": agg,
+        "report_type": "ige",
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.reports.insert_one(doc)
@@ -373,7 +397,7 @@ async def create_report(data: ReportInput, user: dict = Depends(get_current_user
 @api_router.get("/reports")
 async def list_reports(user: dict = Depends(get_current_user)):
     docs = await db.reports.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(200)
-    return docs
+    return [resolve_report_type(d) for d in docs]
 
 
 @api_router.get("/reports/{report_id}")
@@ -381,7 +405,7 @@ async def get_report(report_id: str, user: dict = Depends(get_current_user)):
     doc = await db.reports.find_one({"report_id": report_id, "user_id": user["user_id"]}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Report non trovato")
-    return doc
+    return resolve_report_type(doc)
 
 
 @api_router.delete("/reports/{report_id}")
@@ -564,6 +588,7 @@ async def startup():
     await db.users.create_index("email", unique=True)
     await db.reports.create_index("user_id")
     await db.allergens.create_index("code", unique=True)
+    await db.specific_igg.create_index("dnlab_code", unique=True)
 
     inserted = 0
     for allergen in SEED_ALLERGENS:
@@ -577,6 +602,19 @@ async def startup():
 
     if inserted:
         logger.info("Seeded %d allergens", inserted)
+
+    igg_inserted = 0
+    for item in SEED_SPECIFIC_IGG:
+        result = await db.specific_igg.update_one(
+            {"dnlab_code": item["dnlab_code"]},
+            {"$setOnInsert": dict(item)},
+            upsert=True,
+        )
+        if result.upserted_id is not None:
+            igg_inserted += 1
+
+    if igg_inserted:
+        logger.info("Seeded %d specific IgG", igg_inserted)
 
     existing = await db.users.find_one({"email": ADMIN_EMAIL.lower()})
     if existing is None:
