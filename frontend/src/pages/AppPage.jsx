@@ -108,17 +108,22 @@ export default function AppPage() {
       report_type: workspaceType,
     };
     try {
+      let saved;
       if (editingReportId) {
-        await api.put(`/reports/${editingReportId}`, body);
+        const r = await api.put(`/reports/${editingReportId}`, body);
+        saved = r.data;
         toast.success("Report aggiornato");
       } else {
         const r = await api.post("/reports", body);
+        saved = r.data;
         if (r.data?.report_id) setEditingReportId(r.data.report_id);
         toast.success("Report salvato nello storico");
       }
       loadHistory();
+      return saved || true;
     } catch {
       toast.error("Errore nel salvataggio del report");
+      return null;
     }
   };
 

@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Printer, Pencil, Check, FileText } from "lucide-react";
+import { pdf } from "@react-pdf/renderer";
+import { Printer, Pencil, Check, FileText, Download, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
 import { CATEGORY_ORDER } from "../lib/categories";
 import { getReportTypeConfig } from "../lib/reportTypes";
+import { buildReportPdfFilename, getReportPdfLogoSrc, buildReportPdfSignature } from "../lib/reportPdf";
+import ReportPdfDocument from "./ReportPdfDocument";
 
 const PAGE_CONTENT_PX = 880; // altezza utile per pagina (A4 meno header/margini)
 const CHUNK = 24; // esami per blocco (evita overflow di una categoria lunga)
@@ -104,6 +108,8 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
   const [localDoctor, setLocalDoctor] = useState(doctorName);
   const [saved, setSaved] = useState(false);
   const [pages, setPages] = useState([]);
+  const [lastPdfSignature, setLastPdfSignature] = useState(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const measureRefs = useRef([]);
 
   useEffect(() => {
@@ -112,6 +118,7 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
       setLocalDoctor(doctorName);
       setEditing(false);
       setSaved(false);
+      setLastPdfSignature(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -132,6 +139,20 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
   const ricette = useMemo(
     () => (aggregation?.codes?.length ? distribuisciRicette(aggregation.codes) : []),
     [aggregation]
+  );
+
+  const pdfSignature = useMemo(
+    () =>
+      buildReportPdfSignature({
+        reportType,
+        patient: localPatient,
+        doctorName: localDoctor,
+        notes,
+        letterhead: header,
+        selectedCodes,
+        aggregation,
+      }),
+    [reportType, localPatient, localDoctor, notes, header, selectedCodes, aggregation]
   );
 
   // Costruisce i blocchi impaginabili del report da stampare
@@ -264,13 +285,51 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
   }, [blocks, open]);
 
   const handleSave = async () => {
-    await onSave({
+    const result = await onSave({
       patient: localPatient,
       doctor_name: localDoctor,
       notes,
       letterhead: header,
     });
-    setSaved(true);
+    if (result) setSaved(true);
+    return result;
+  };
+
+  const downloadPdf = async () => {
+    setPdfBusy(true);
+    try {
+      const blob = await pdf(
+        <ReportPdfDocument
+          reportType={reportType}
+          selectedItems={selectedItems}
+          patient={localPatient}
+          doctorName={localDoctor}
+          notes={notes}
+          letterhead={header}
+          aggregation={aggregation}
+          ricette={ricette}
+          logoSrc={getReportPdfLogoSrc()}
+        />
+      ).toBlob();
+      const filename = buildReportPdfFilename({ reportType, patient: localPatient });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      setLastPdfSignature(pdfSignature);
+    } catch {
+      toast.error("Errore nella generazione del PDF");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  const handleSaveAndDownload = async () => {
+    const result = await handleSave();
+    if (!result) return;
+    await downloadPdf();
   };
 
   return (
@@ -281,30 +340,57 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
           Anteprima e modifica del report da consegnare al paziente prima della stampa.
         </DialogDescription>
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3 no-print">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-sky-600" />
-            <span className="font-heading font-semibold text-slate-900">Anteprima Report</span>
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-3 no-print">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-sky-600" />
+              <span className="font-heading font-semibold text-slate-900">Anteprima Report</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant={editing ? "default" : "outline"}
+                onClick={() => setEditing((e) => !e)}
+                data-testid="btn-edit-report-button"
+                className={editing ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+              >
+                {editing ? <Check className="h-4 w-4 mr-1.5" /> : <Pencil className="h-4 w-4 mr-1.5" />}
+                {editing ? "Fine modifica" : "Modifica"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleSave} data-testid="btn-save-report-button">
+                {saved ? <Check className="h-4 w-4 mr-1.5 text-emerald-600" /> : null}
+                {saved ? "Salvato" : "Salva"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={downloadPdf}
+                disabled={pdfBusy}
+                data-testid="btn-download-pdf"
+              >
+                <Download className="h-4 w-4 mr-1.5" />
+                Scarica PDF
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSaveAndDownload}
+                disabled={pdfBusy}
+                data-testid="btn-save-and-download-pdf"
+              >
+                <Save className="h-4 w-4 mr-1.5" />
+                Salva e scarica PDF
+              </Button>
+              <Button size="sm" onClick={() => window.print()} data-testid="btn-print-report-button" className="bg-sky-600 hover:bg-sky-700">
+                <Printer className="h-4 w-4 mr-1.5" /> Stampa
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant={editing ? "default" : "outline"}
-              onClick={() => setEditing((e) => !e)}
-              data-testid="btn-edit-report-button"
-              className={editing ? "bg-emerald-600 hover:bg-emerald-700" : ""}
-            >
-              {editing ? <Check className="h-4 w-4 mr-1.5" /> : <Pencil className="h-4 w-4 mr-1.5" />}
-              {editing ? "Fine modifica" : "Modifica"}
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleSave} data-testid="btn-save-report-button">
-              {saved ? <Check className="h-4 w-4 mr-1.5 text-emerald-600" /> : null}
-              {saved ? "Salvato" : "Salva"}
-            </Button>
-            <Button size="sm" onClick={() => window.print()} data-testid="btn-print-report-button" className="bg-sky-600 hover:bg-sky-700">
-              <Printer className="h-4 w-4 mr-1.5" /> Stampa
-            </Button>
-          </div>
+          {lastPdfSignature && lastPdfSignature !== pdfSignature && (
+            <p className="text-xs text-amber-700 mt-2" data-testid="pdf-stale-warning">
+              Report modificato dopo l'ultimo download. Scarica il PDF aggiornato.
+            </p>
+          )}
         </div>
 
         {/* Anteprima a schermo */}
