@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
-import { FileText, ClipboardList, History, Trash2, Eye, Settings } from "lucide-react";
+import { FileText, ClipboardList, History, Trash2, Eye, Settings, Plus } from "lucide-react";
 import Header from "../components/Header";
 import PatientForm from "../components/PatientForm";
 import DualList from "../components/DualList";
@@ -32,6 +32,7 @@ export default function AppPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState("all");
+  const [editingReportId, setEditingReportId] = useState(null);
   const debounceRef = useRef(null);
 
   const loadAllergens = useCallback(() => {
@@ -76,28 +77,45 @@ export default function AppPage() {
     return () => debounceRef.current && clearTimeout(debounceRef.current);
   }, [selectedCodes, workspaceType]);
 
+  const emptyIgeAggregation = { codes: [], total: 0, molecular_count: 0, standard_count: 0 };
+
+  const startNewReport = () => {
+    setEditingReportId(null);
+    setSelectedCodes([]);
+    setPatient({ first_name: "", last_name: "", dob: "" });
+    setDoctorName(user?.name || "");
+    setAggregation(workspaceType === "igg" ? buildIggPrestazioni(0) : emptyIgeAggregation);
+  };
+
   const switchWorkspace = (type) => {
-    if (type === workspaceType) return;
+    if (editingReportId || type === workspaceType) return;
     setWorkspaceType(type);
     setSelectedCodes([]);
     setAggregation(
       type === "igg"
         ? buildIggPrestazioni(0)
-        : { codes: [], total: 0, molecular_count: 0, standard_count: 0 }
+        : emptyIgeAggregation
     );
   };
 
   const saveReport = async (overrides) => {
+    const body = {
+      patient: overrides?.patient || patient,
+      doctor_name: overrides?.doctor_name || doctorName,
+      allergen_codes: selectedCodes,
+      notes: overrides?.notes || "",
+      letterhead: overrides?.letterhead || "",
+      report_type: workspaceType,
+    };
     try {
-      await api.post("/reports", {
-        patient: overrides?.patient || patient,
-        doctor_name: overrides?.doctor_name || doctorName,
-        allergen_codes: selectedCodes,
-        notes: overrides?.notes || "",
-        letterhead: overrides?.letterhead || "",
-        report_type: workspaceType,
-      });
-      toast.success("Report salvato nello storico");
+      if (editingReportId) {
+        await api.put(`/reports/${editingReportId}`, body);
+        toast.success("Report aggiornato");
+      } else {
+        const r = await api.post("/reports", body);
+        if (r.data?.report_id) setEditingReportId(r.data.report_id);
+        toast.success("Report salvato nello storico");
+      }
       loadHistory();
     } catch {
       toast.error("Errore nel salvataggio del report");
@@ -107,6 +125,7 @@ export default function AppPage() {
   const deleteReport = async (id) => {
     try {
       await api.delete(`/reports/${id}`);
+      if (id === editingReportId) startNewReport();
       loadHistory();
       toast.success("Report eliminato");
     } catch {
@@ -117,6 +136,7 @@ export default function AppPage() {
   const loadFromHistory = (rep) => {
     const type = rep.report_type === "igg" ? "igg" : "ige";
     const codes = rep.allergen_codes || [];
+    setEditingReportId(rep.report_id);
     setWorkspaceType(type);
     setSelectedCodes(codes);
     setPatient(rep.patient || { first_name: "", last_name: "", dob: "" });
@@ -152,18 +172,37 @@ export default function AppPage() {
           </TabsList>
 
           <TabsContent value="nuovo" className="space-y-6">
+            {editingReportId && (
+              <Card className="p-4 border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-slate-700">
+                  <span className="font-medium">Modifica report esistente</span>
+                  <span className="text-slate-500 font-mono text-xs ml-2">{editingReportId}</span>
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={startNewReport}
+                  data-testid="btn-new-report"
+                >
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  Nuovo report
+                </Button>
+              </Card>
+            )}
+
             <PatientForm patient={patient} setPatient={setPatient} doctorName={doctorName} setDoctorName={setDoctorName} />
 
             <Card className="p-5 border-slate-200">
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
                 Tipo di esame
               </p>
-              <div className="inline-flex flex-wrap rounded-lg bg-slate-100 p-1" data-testid="workspace-type-selector">
+              <div className={`inline-flex flex-wrap rounded-lg bg-slate-100 p-1 ${editingReportId ? "opacity-60" : ""}`} data-testid="workspace-type-selector">
                 <button
                   type="button"
                   data-testid="workspace-ige"
+                  disabled={!!editingReportId}
                   onClick={() => switchWorkspace("ige")}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all disabled:cursor-not-allowed ${
                     workspaceType === "ige"
                       ? "bg-white text-slate-900 shadow"
                       : "text-slate-500 hover:text-slate-800"
@@ -174,8 +213,9 @@ export default function AppPage() {
                 <button
                   type="button"
                   data-testid="workspace-igg"
+                  disabled={!!editingReportId}
                   onClick={() => switchWorkspace("igg")}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all disabled:cursor-not-allowed ${
                     workspaceType === "igg"
                       ? "bg-white text-slate-900 shadow"
                       : "text-slate-500 hover:text-slate-800"

@@ -75,6 +75,27 @@ def build_igg_aggregation(count):
     }
 
 
+async def build_report_snapshot(data: "ReportInput"):
+    """Validate selection and build exams snapshot + aggregation for a report."""
+    if data.report_type == "igg":
+        if not data.allergen_codes:
+            raise HTTPException(status_code=400, detail="Seleziona almeno un esame IgG")
+        if len(data.allergen_codes) != len(set(data.allergen_codes)):
+            raise HTTPException(
+                status_code=400,
+                detail="La selezione IgG contiene codici duplicati",
+            )
+        items = await fetch_specific_igg_by_codes(data.allergen_codes)
+        if len(items) != len(data.allergen_codes):
+            raise HTTPException(
+                status_code=400,
+                detail="Uno o più codici IgG selezionati non sono validi",
+            )
+        return items, build_igg_aggregation(len(items)), "igg"
+    items = await fetch_allergens_by_codes(data.allergen_codes)
+    return items, aggregate(items), "ige"
+
+
 async def log_allergen_change(action: str, allergen: dict, user: dict, details: str = ""):
     """Traccia chi/quando ha creato, modificato o eliminato un allergene."""
     await db.allergen_audit.insert_one({
@@ -388,27 +409,7 @@ async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current
 # --- Reports ---
 @api_router.post("/reports")
 async def create_report(data: ReportInput, user: dict = Depends(get_current_user)):
-    if data.report_type == "igg":
-        if not data.allergen_codes:
-            raise HTTPException(status_code=400, detail="Seleziona almeno un esame IgG")
-        if len(data.allergen_codes) != len(set(data.allergen_codes)):
-            raise HTTPException(
-                status_code=400,
-                detail="La selezione IgG contiene codici duplicati",
-            )
-        items = await fetch_specific_igg_by_codes(data.allergen_codes)
-        if len(items) != len(data.allergen_codes):
-            raise HTTPException(
-                status_code=400,
-                detail="Uno o più codici IgG selezionati non sono validi",
-            )
-        n = len(items)
-        agg = build_igg_aggregation(n)
-        report_type = "igg"
-    else:
-        items = await fetch_allergens_by_codes(data.allergen_codes)
-        agg = aggregate(items)
-        report_type = "ige"
+    items, agg, report_type = await build_report_snapshot(data)
     report_id = f"rep_{uuid.uuid4().hex[:12]}"
     doc = {
         "report_id": report_id,
@@ -426,6 +427,43 @@ async def create_report(data: ReportInput, user: dict = Depends(get_current_user
     await db.reports.insert_one(doc)
     doc.pop("_id", None)
     return doc
+
+
+@api_router.put("/reports/{report_id}")
+async def update_report(report_id: str, data: ReportInput, user: dict = Depends(get_current_user)):
+    existing = await db.reports.find_one(
+        {"report_id": report_id, "user_id": user["user_id"]},
+        {"_id": 0},
+    )
+    if not existing:
+        raise HTTPException(status_code=404, detail="Report non trovato")
+    existing_type = resolve_report_type(existing).get("report_type", "ige")
+    if existing_type != data.report_type:
+        raise HTTPException(
+            status_code=400,
+            detail="Non è possibile cambiare il tipo di un report esistente",
+        )
+    items, agg, report_type = await build_report_snapshot(data)
+    updates = {
+        "patient": data.patient.model_dump(),
+        "doctor_name": data.doctor_name,
+        "notes": data.notes,
+        "letterhead": data.letterhead,
+        "allergen_codes": data.allergen_codes,
+        "allergens": items,
+        "aggregation": agg,
+        "report_type": report_type,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.reports.update_one(
+        {"report_id": report_id, "user_id": user["user_id"]},
+        {"$set": updates},
+    )
+    doc = await db.reports.find_one(
+        {"report_id": report_id, "user_id": user["user_id"]},
+        {"_id": 0},
+    )
+    return resolve_report_type(doc)
 
 
 @api_router.get("/reports")

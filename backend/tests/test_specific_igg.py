@@ -238,3 +238,148 @@ class TestReportType:
         payload = self._payload({"report_type": "invalid"})
         r = admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15)
         assert r.status_code == 422
+
+
+class TestReportUpdate:
+    def _payload(self, extra=None):
+        payload = {
+            "patient": {
+                "first_name": f"TEST_{uuid.uuid4().hex[:8]}",
+                "last_name": "Rossi",
+                "dob": "1990-01-01",
+            },
+            "doctor_name": "Dr TEST",
+            "allergen_codes": ["f1", "f2"],
+            "notes": "test notes",
+            "letterhead": "",
+        }
+        if extra:
+            payload.update(extra)
+        return payload
+
+    def test_put_ige_updates_same_id(self, admin_session):
+        created = admin_session.post(
+            f"{BASE_URL}/api/reports", json=self._payload({"report_type": "ige"}), timeout=15
+        )
+        assert created.status_code == 200, created.text
+        orig = created.json()
+        report_id = orig["report_id"]
+        created_at = orig["created_at"]
+        payload = self._payload({
+            "report_type": "ige",
+            "allergen_codes": ["f1", "f2", "f3"],
+            "notes": "updated",
+        })
+        r = admin_session.put(f"{BASE_URL}/api/reports/{report_id}", json=payload, timeout=15)
+        assert r.status_code == 200, r.text
+        rep = r.json()
+        assert rep["report_id"] == report_id
+        assert rep["created_at"] == created_at
+        assert "updated_at" in rep and rep["updated_at"]
+        assert rep["allergen_codes"] == ["f1", "f2", "f3"]
+        assert rep["aggregation"] != orig["aggregation"]
+        assert rep["notes"] == "updated"
+        listed = admin_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
+        assert sum(1 for x in listed if x["report_id"] == report_id) == 1
+        admin_session.delete(f"{BASE_URL}/api/reports/{report_id}", timeout=15)
+
+    def test_put_igg_updates_snapshot_and_quantity(self, admin_session, seed_records):
+        codes2 = [seed_records[0]["dnlab_code"], seed_records[1]["dnlab_code"]]
+        codes1 = [seed_records[0]["dnlab_code"]]
+        created = admin_session.post(
+            f"{BASE_URL}/api/reports",
+            json=self._payload({"report_type": "igg", "allergen_codes": codes2}),
+            timeout=15,
+        )
+        assert created.status_code == 200, created.text
+        orig = created.json()
+        report_id = orig["report_id"]
+        created_at = orig["created_at"]
+        r = admin_session.put(
+            f"{BASE_URL}/api/reports/{report_id}",
+            json=self._payload({"report_type": "igg", "allergen_codes": codes1}),
+            timeout=15,
+        )
+        assert r.status_code == 200, r.text
+        rep = r.json()
+        assert rep["report_id"] == report_id
+        assert rep["created_at"] == created_at
+        assert "updated_at" in rep
+        assert rep["report_type"] == "igg"
+        assert [a["dnlab_code"] for a in rep["allergens"]] == codes1
+        assert rep["aggregation"]["total"] == 1
+        assert rep["aggregation"]["codes"][0]["siss_code"] == "0090685"
+        assert rep["aggregation"]["codes"][0]["quantity"] == 1
+        assert "molecular_count" not in rep["aggregation"]
+        admin_session.delete(f"{BASE_URL}/api/reports/{report_id}", timeout=15)
+
+    def test_put_missing_report_404(self, admin_session):
+        r = admin_session.put(
+            f"{BASE_URL}/api/reports/rep_doesnotexist",
+            json=self._payload({"report_type": "ige"}),
+            timeout=15,
+        )
+        assert r.status_code == 404
+
+    def test_put_cannot_change_ige_to_igg(self, admin_session, seed_records):
+        created = admin_session.post(
+            f"{BASE_URL}/api/reports", json=self._payload({"report_type": "ige"}), timeout=15
+        ).json()
+        r = admin_session.put(
+            f"{BASE_URL}/api/reports/{created['report_id']}",
+            json=self._payload({
+                "report_type": "igg",
+                "allergen_codes": [seed_records[0]["dnlab_code"]],
+            }),
+            timeout=15,
+        )
+        assert r.status_code == 400, r.text
+        assert "Non è possibile cambiare il tipo di un report esistente" in r.text
+        admin_session.delete(f"{BASE_URL}/api/reports/{created['report_id']}", timeout=15)
+
+    def test_put_cannot_change_igg_to_ige(self, admin_session, seed_records):
+        created = admin_session.post(
+            f"{BASE_URL}/api/reports",
+            json=self._payload({
+                "report_type": "igg",
+                "allergen_codes": [seed_records[0]["dnlab_code"]],
+            }),
+            timeout=15,
+        ).json()
+        r = admin_session.put(
+            f"{BASE_URL}/api/reports/{created['report_id']}",
+            json=self._payload({"report_type": "ige", "allergen_codes": ["f1", "f2"]}),
+            timeout=15,
+        )
+        assert r.status_code == 400, r.text
+        assert "Non è possibile cambiare il tipo di un report esistente" in r.text
+        admin_session.delete(f"{BASE_URL}/api/reports/{created['report_id']}", timeout=15)
+
+    def test_put_igg_invalid_and_duplicate_codes_400(self, admin_session, seed_records):
+        valid = seed_records[0]["dnlab_code"]
+        created = admin_session.post(
+            f"{BASE_URL}/api/reports",
+            json=self._payload({"report_type": "igg", "allergen_codes": [valid]}),
+            timeout=15,
+        ).json()
+        report_id = created["report_id"]
+        r_dup = admin_session.put(
+            f"{BASE_URL}/api/reports/{report_id}",
+            json=self._payload({"report_type": "igg", "allergen_codes": [valid, valid]}),
+            timeout=15,
+        )
+        assert r_dup.status_code == 400
+        assert "La selezione IgG contiene codici duplicati" in r_dup.text
+        r_bad = admin_session.put(
+            f"{BASE_URL}/api/reports/{report_id}",
+            json=self._payload({
+                "report_type": "igg",
+                "allergen_codes": [valid, "dnlab_inesistente_xyz"],
+            }),
+            timeout=15,
+        )
+        assert r_bad.status_code == 400
+        assert "Uno o più codici IgG selezionati non sono validi" in r_bad.text
+        still = admin_session.get(f"{BASE_URL}/api/reports/{report_id}", timeout=15).json()
+        assert still["allergen_codes"] == [valid]
+        admin_session.delete(f"{BASE_URL}/api/reports/{report_id}", timeout=15)
