@@ -164,16 +164,72 @@ class TestReportType:
         assert rep["report_type"] == "ige"
         admin_session.delete(f"{BASE_URL}/api/reports/{rep['report_id']}", timeout=15)
 
-    def test_igg_returns_501_and_creates_nothing(self, admin_session):
-        marker = f"TEST_IGG_{uuid.uuid4().hex[:8]}"
+    def test_igg_report_saved_and_isolated_from_ige(self, admin_session, seed_records):
+        codes = [seed_records[0]["dnlab_code"], seed_records[1]["dnlab_code"]]
+        names = {seed_records[0]["name"], seed_records[1]["name"]}
         payload = self._payload({
             "report_type": "igg",
+            "allergen_codes": codes,
+        })
+        r = admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15)
+        assert r.status_code == 200, r.text
+        rep = r.json()
+        assert rep["report_type"] == "igg"
+        assert rep["allergen_codes"] == codes
+        snap_codes = [a["dnlab_code"] for a in rep["allergens"]]
+        assert snap_codes == codes
+        assert {a["name"] for a in rep["allergens"]} == names
+        assert all(a.get("type") == "IgG specifiche" for a in rep["allergens"])
+        agg = rep["aggregation"]
+        assert agg["total"] == 2
+        assert len(agg["codes"]) == 1
+        assert agg["codes"][0]["siss_code"] == "0090685"
+        assert agg["codes"][0]["description"] == "IGG SPECIFICHE ALLERGOLOGICHE"
+        assert agg["codes"][0]["quantity"] == 2
+        assert "0090681.00" not in {c["siss_code"] for c in agg["codes"]}
+        assert "molecular_count" not in agg
+
+        r2 = admin_session.get(f"{BASE_URL}/api/reports/{rep['report_id']}", timeout=15)
+        assert r2.status_code == 200
+        assert r2.json()["report_type"] == "igg"
+
+        listed = admin_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
+        found = next(x for x in listed if x["report_id"] == rep["report_id"])
+        assert found["report_type"] == "igg"
+
+        r3 = admin_session.delete(f"{BASE_URL}/api/reports/{rep['report_id']}", timeout=15)
+        assert r3.status_code == 200
+        r4 = admin_session.get(f"{BASE_URL}/api/reports/{rep['report_id']}", timeout=15)
+        assert r4.status_code == 404
+
+    def test_igg_invalid_code_returns_400_and_creates_nothing(self, admin_session, seed_records):
+        valid = seed_records[0]["dnlab_code"]
+        marker = f"TEST_IGG_BAD_{uuid.uuid4().hex[:8]}"
+        payload = self._payload({
+            "report_type": "igg",
+            "allergen_codes": [valid, "dnlab_inesistente_xyz"],
             "patient": {"first_name": marker, "last_name": "Rossi", "dob": "1990-01-01"},
         })
         before = admin_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
         r = admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15)
-        assert r.status_code == 501, r.text
-        assert "Il salvataggio dei report IgG sarà implementato nella fase successiva" in r.text
+        assert r.status_code == 400, r.text
+        assert "Uno o più codici IgG selezionati non sono validi" in r.text
+        after = admin_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
+        assert len(after) == len(before)
+        assert all(doc.get("patient", {}).get("first_name") != marker for doc in after)
+
+    def test_igg_duplicate_code_returns_400_and_creates_nothing(self, admin_session, seed_records):
+        valid = seed_records[0]["dnlab_code"]
+        marker = f"TEST_IGG_DUP_{uuid.uuid4().hex[:8]}"
+        payload = self._payload({
+            "report_type": "igg",
+            "allergen_codes": [valid, valid],
+            "patient": {"first_name": marker, "last_name": "Rossi", "dob": "1990-01-01"},
+        })
+        before = admin_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
+        r = admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15)
+        assert r.status_code == 400, r.text
+        assert "La selezione IgG contiene codici duplicati" in r.text
         after = admin_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
         assert len(after) == len(before)
         assert all(doc.get("patient", {}).get("first_name") != marker for doc in after)

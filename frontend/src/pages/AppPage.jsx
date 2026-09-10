@@ -31,6 +31,7 @@ export default function AppPage() {
   const [aggregation, setAggregation] = useState({ codes: [], total: 0, molecular_count: 0, standard_count: 0 });
   const [reportOpen, setReportOpen] = useState(false);
   const [history, setHistory] = useState([]);
+  const [historyFilter, setHistoryFilter] = useState("all");
   const debounceRef = useRef(null);
 
   const loadAllergens = useCallback(() => {
@@ -94,6 +95,7 @@ export default function AppPage() {
         allergen_codes: selectedCodes,
         notes: overrides?.notes || "",
         letterhead: overrides?.letterhead || "",
+        report_type: workspaceType,
       });
       toast.success("Report salvato nello storico");
       loadHistory();
@@ -113,12 +115,22 @@ export default function AppPage() {
   };
 
   const loadFromHistory = (rep) => {
-    setWorkspaceType("ige");
-    setSelectedCodes(rep.allergen_codes || []);
+    const type = rep.report_type === "igg" ? "igg" : "ige";
+    const codes = rep.allergen_codes || [];
+    setWorkspaceType(type);
+    setSelectedCodes(codes);
     setPatient(rep.patient || { first_name: "", last_name: "", dob: "" });
     setDoctorName(rep.doctor_name || doctorName);
+    if (type === "igg") {
+      setAggregation(buildIggPrestazioni(codes.length));
+    }
     toast.success("Report caricato nell'editor");
   };
+
+  const visibleHistory = history.filter((rep) => {
+    if (historyFilter === "all") return true;
+    return (rep.report_type || "ige") === historyFilter;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -198,10 +210,10 @@ export default function AppPage() {
               <IggSissSummary selectedCount={selectedCodes.length} />
             )}
 
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex justify-end">
               <Button
                 size="lg"
-                disabled={!selectedCodes.length || workspaceType === "igg"}
+                disabled={!selectedCodes.length}
                 onClick={() => setReportOpen(true)}
                 data-testid="btn-preview-report-button"
                 className="bg-slate-900 hover:bg-slate-800"
@@ -209,11 +221,6 @@ export default function AppPage() {
                 <FileText className="h-4 w-4 mr-2" />
                 Genera Report ({selectedCodes.length})
               </Button>
-              {workspaceType === "igg" && (
-                <p className="text-xs text-slate-500" data-testid="igg-report-phase-note">
-                  Report IgG disponibile nella fase successiva
-                </p>
-              )}
             </div>
           </TabsContent>
 
@@ -224,13 +231,54 @@ export default function AppPage() {
                 Nessun report salvato finora.
               </Card>
             ) : (
+              <div className="space-y-4">
+                <div className="inline-flex flex-wrap rounded-lg bg-slate-100 p-1" data-testid="history-type-filter">
+                  {[
+                    { id: "all", label: "Tutti" },
+                    { id: "ige", label: "IgE" },
+                    { id: "igg", label: "IgG" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      data-testid={`history-filter-${opt.id}`}
+                      onClick={() => setHistoryFilter(opt.id)}
+                      className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                        historyFilter === opt.id
+                          ? "bg-white text-slate-900 shadow"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {visibleHistory.length === 0 ? (
+                  <Card className="p-12 text-center text-slate-400 border-dashed">
+                    Nessun report in questo filtro.
+                  </Card>
+                ) : (
               <div className="grid gap-3">
-                {history.map((rep) => (
+                {visibleHistory.map((rep) => {
+                  const kind = rep.report_type === "igg" ? "igg" : "ige";
+                  return (
                   <Card key={rep.report_id} className="p-4 flex items-center justify-between" data-testid={`history-item-${rep.report_id}`}>
                     <div>
-                      <p className="font-medium text-slate-900">
-                        {rep.patient?.first_name} {rep.patient?.last_name || "— Paziente"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-slate-900">
+                          {rep.patient?.first_name} {rep.patient?.last_name || "— Paziente"}
+                        </p>
+                        <span
+                          data-testid={`history-badge-${kind}`}
+                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
+                            kind === "igg"
+                              ? "bg-teal-50 text-teal-800 border-teal-200"
+                              : "bg-sky-50 text-sky-800 border-sky-200"
+                          }`}
+                        >
+                          {kind === "igg" ? "IgG" : "IgE"}
+                        </span>
+                      </div>
                       <p className="text-xs text-slate-500 mt-0.5">
                         {rep.allergen_codes?.length} esami · {rep.aggregation?.codes?.length || 0} codici SISS ·{" "}
                         {new Date(rep.created_at).toLocaleString("it-IT")}
@@ -245,7 +293,10 @@ export default function AppPage() {
                       </Button>
                     </div>
                   </Card>
-                ))}
+                  );
+                })}
+              </div>
+                )}
               </div>
             )}
           </TabsContent>
@@ -280,7 +331,8 @@ export default function AppPage() {
       <ReportModal
         open={reportOpen}
         onOpenChange={setReportOpen}
-        allergens={allergens}
+        reportType={workspaceType}
+        allergens={workspaceType === "ige" ? allergens : specificIgg}
         selectedCodes={selectedCodes}
         patient={patient}
         doctorName={doctorName}

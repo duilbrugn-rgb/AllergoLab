@@ -55,6 +55,26 @@ async def fetch_allergens_by_codes(codes):
     return [by_code[c] for c in codes if c in by_code]
 
 
+async def fetch_specific_igg_by_codes(codes):
+    docs = await db.specific_igg.find({"dnlab_code": {"$in": codes}}, {"_id": 0}).to_list(2000)
+    by_code = {d["dnlab_code"]: d for d in docs}
+    return [by_code[c] for c in codes if c in by_code]
+
+
+def build_igg_aggregation(count):
+    n = int(count or 0)
+    if n <= 0:
+        return {"total": 0, "codes": []}
+    return {
+        "total": n,
+        "codes": [{
+            "siss_code": "0090685",
+            "description": "IGG SPECIFICHE ALLERGOLOGICHE",
+            "quantity": n,
+        }],
+    }
+
+
 async def log_allergen_change(action: str, allergen: dict, user: dict, details: str = ""):
     """Traccia chi/quando ha creato, modificato o eliminato un allergene."""
     await db.allergen_audit.insert_one({
@@ -369,12 +389,26 @@ async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current
 @api_router.post("/reports")
 async def create_report(data: ReportInput, user: dict = Depends(get_current_user)):
     if data.report_type == "igg":
-        raise HTTPException(
-            status_code=501,
-            detail="Il salvataggio dei report IgG sarà implementato nella fase successiva",
-        )
-    items = await fetch_allergens_by_codes(data.allergen_codes)
-    agg = aggregate(items)
+        if not data.allergen_codes:
+            raise HTTPException(status_code=400, detail="Seleziona almeno un esame IgG")
+        if len(data.allergen_codes) != len(set(data.allergen_codes)):
+            raise HTTPException(
+                status_code=400,
+                detail="La selezione IgG contiene codici duplicati",
+            )
+        items = await fetch_specific_igg_by_codes(data.allergen_codes)
+        if len(items) != len(data.allergen_codes):
+            raise HTTPException(
+                status_code=400,
+                detail="Uno o più codici IgG selezionati non sono validi",
+            )
+        n = len(items)
+        agg = build_igg_aggregation(n)
+        report_type = "igg"
+    else:
+        items = await fetch_allergens_by_codes(data.allergen_codes)
+        agg = aggregate(items)
+        report_type = "ige"
     report_id = f"rep_{uuid.uuid4().hex[:12]}"
     doc = {
         "report_id": report_id,
@@ -386,7 +420,7 @@ async def create_report(data: ReportInput, user: dict = Depends(get_current_user
         "allergen_codes": data.allergen_codes,
         "allergens": items,
         "aggregation": agg,
-        "report_type": "ige",
+        "report_type": report_type,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.reports.insert_one(doc)
