@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import PatientForm from "../components/PatientForm";
 import DualList from "../components/DualList";
 import SissSummary from "../components/SissSummary";
+import IggSissSummary from "../components/IggSissSummary";
 import ReportModal from "../components/ReportModal";
 import AdminAllergens from "../components/AdminAllergens";
 import AdminUsers from "../components/AdminUsers";
@@ -16,11 +17,14 @@ import { Card } from "../components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import api from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { buildIggPrestazioni } from "../lib/iggPrestazioni";
 
 export default function AppPage() {
   const { user } = useAuth();
   const [allergens, setAllergens] = useState([]);
+  const [specificIgg, setSpecificIgg] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [workspaceType, setWorkspaceType] = useState("ige");
   const [selectedCodes, setSelectedCodes] = useState([]);
   const [patient, setPatient] = useState({ first_name: "", last_name: "", dob: "" });
   const [doctorName, setDoctorName] = useState(user?.name || "");
@@ -33,6 +37,10 @@ export default function AppPage() {
     api.get("/allergens").then((r) => setAllergens(r.data)).catch(() => toast.error("Errore caricamento allergeni"));
   }, []);
 
+  const loadSpecificIgg = useCallback(() => {
+    api.get("/specific-igg").then((r) => setSpecificIgg(r.data)).catch(() => toast.error("Errore caricamento IgG specifiche"));
+  }, []);
+
   const loadHistory = useCallback(() => {
     api.get("/reports").then((r) => setHistory(r.data)).catch(() => {});
   }, []);
@@ -43,11 +51,17 @@ export default function AppPage() {
 
   useEffect(() => {
     loadAllergens();
+    loadSpecificIgg();
     loadHistory();
     loadProfiles();
-  }, [loadAllergens, loadHistory, loadProfiles]);
+  }, [loadAllergens, loadSpecificIgg, loadHistory, loadProfiles]);
 
   useEffect(() => {
+    if (workspaceType === "igg") {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      setAggregation(buildIggPrestazioni(selectedCodes.length));
+      return;
+    }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!selectedCodes.length) {
       setAggregation({ codes: [], total: 0, molecular_count: 0, standard_count: 0 });
@@ -59,7 +73,18 @@ export default function AppPage() {
         .catch(() => {});
     }, 250);
     return () => debounceRef.current && clearTimeout(debounceRef.current);
-  }, [selectedCodes]);
+  }, [selectedCodes, workspaceType]);
+
+  const switchWorkspace = (type) => {
+    if (type === workspaceType) return;
+    setWorkspaceType(type);
+    setSelectedCodes([]);
+    setAggregation(
+      type === "igg"
+        ? buildIggPrestazioni(0)
+        : { codes: [], total: 0, molecular_count: 0, standard_count: 0 }
+    );
+  };
 
   const saveReport = async (overrides) => {
     try {
@@ -88,6 +113,7 @@ export default function AppPage() {
   };
 
   const loadFromHistory = (rep) => {
+    setWorkspaceType("ige");
     setSelectedCodes(rep.allergen_codes || []);
     setPatient(rep.patient || { first_name: "", last_name: "", dob: "" });
     setDoctorName(rep.doctor_name || doctorName);
@@ -116,16 +142,66 @@ export default function AppPage() {
           <TabsContent value="nuovo" className="space-y-6">
             <PatientForm patient={patient} setPatient={setPatient} doctorName={doctorName} setDoctorName={setDoctorName} />
 
-            <ProfileSelector profiles={profiles} allergens={allergens} selectedCodes={selectedCodes} setSelectedCodes={setSelectedCodes} />
+            <Card className="p-5 border-slate-200">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                Tipo di esame
+              </p>
+              <div className="inline-flex flex-wrap rounded-lg bg-slate-100 p-1" data-testid="workspace-type-selector">
+                <button
+                  type="button"
+                  data-testid="workspace-ige"
+                  onClick={() => switchWorkspace("ige")}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                    workspaceType === "ige"
+                      ? "bg-white text-slate-900 shadow"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  IgE specifiche
+                </button>
+                <button
+                  type="button"
+                  data-testid="workspace-igg"
+                  onClick={() => switchWorkspace("igg")}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                    workspaceType === "igg"
+                      ? "bg-white text-slate-900 shadow"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  IgG specifiche / precipitine
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">
+                {workspaceType === "ige"
+                  ? "Stai componendo un pannello per IgE specifiche. Aggregazione SISS invariata."
+                  : "Stai componendo un pannello per IgG specifiche / precipitine. Le prestazioni coincidono con gli esami selezionati."}
+              </p>
+            </Card>
 
-            <DualList allergens={allergens} selectedCodes={selectedCodes} setSelectedCodes={setSelectedCodes} />
+            {workspaceType === "ige" && (
+              <ProfileSelector profiles={profiles} allergens={allergens} selectedCodes={selectedCodes} setSelectedCodes={setSelectedCodes} />
+            )}
 
-            <SissSummary aggregation={aggregation} />
+            <DualList
+              key={workspaceType}
+              allergens={workspaceType === "ige" ? allergens : specificIgg}
+              selectedCodes={selectedCodes}
+              setSelectedCodes={setSelectedCodes}
+              codeField={workspaceType === "ige" ? "code" : "dnlab_code"}
+              showCategoryFilters={workspaceType === "ige"}
+            />
 
-            <div className="flex justify-end">
+            {workspaceType === "ige" ? (
+              <SissSummary aggregation={aggregation} />
+            ) : (
+              <IggSissSummary selectedCount={selectedCodes.length} />
+            )}
+
+            <div className="flex flex-col items-end gap-2">
               <Button
                 size="lg"
-                disabled={!selectedCodes.length}
+                disabled={!selectedCodes.length || workspaceType === "igg"}
                 onClick={() => setReportOpen(true)}
                 data-testid="btn-preview-report-button"
                 className="bg-slate-900 hover:bg-slate-800"
@@ -133,6 +209,11 @@ export default function AppPage() {
                 <FileText className="h-4 w-4 mr-2" />
                 Genera Report ({selectedCodes.length})
               </Button>
+              {workspaceType === "igg" && (
+                <p className="text-xs text-slate-500" data-testid="igg-report-phase-note">
+                  Report IgG disponibile nella fase successiva
+                </p>
+              )}
             </div>
           </TabsContent>
 
