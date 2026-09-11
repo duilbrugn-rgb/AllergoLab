@@ -71,9 +71,7 @@ const styles = StyleSheet.create({
     height: 52,
   },
   titleMain: {
-    flexGrow: 14,
-    flexShrink: 1,
-    flexBasis: 0,
+    height: HEADER_HEIGHT * 0.75,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 8,
@@ -87,9 +85,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.2,
   },
   moduloWrap: {
-    flexGrow: 5,
-    flexShrink: 1,
-    flexBasis: 0,
+    height: HEADER_HEIGHT * 0.25,
     justifyContent: "center",
     borderTopWidth: HEADER_LINE_WIDTH,
     borderColor: HEADER_LINE_COLOR,
