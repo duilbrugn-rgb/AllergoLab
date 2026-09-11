@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     height: 52,
   },
   titleMain: {
-    flexGrow: 11,
+    flexGrow: 14,
     flexShrink: 1,
     flexBasis: 0,
     alignItems: "center",
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.2,
   },
   moduloWrap: {
-    flexGrow: 4,
+    flexGrow: 5,
     flexShrink: 1,
     flexBasis: 0,
     justifyContent: "center",
