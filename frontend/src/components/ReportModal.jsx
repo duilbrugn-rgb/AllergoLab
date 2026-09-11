@@ -98,12 +98,12 @@ function ReportHeader({ page, total, cfg }) {
   );
 }
 
-export default function ReportModal({ open, onOpenChange, allergens, selectedCodes, patient, doctorName, aggregation, onSave, reportType = "ige" }) {
+export default function ReportModal({ open, onOpenChange, allergens, selectedCodes, patient, doctorName, aggregation, onSave, initialNotes = "", initialLetterhead = "", reportType = "ige" }) {
   const cfg = getReportTypeConfig(reportType);
   const codeField = cfg.codeField;
   const [editing, setEditing] = useState(false);
-  const [header, setHeader] = useState("Laboratorio Analisi — Promemoria prelievo allergologico");
-  const [notes, setNotes] = useState("");
+  const [header, setHeader] = useState(initialLetterhead);
+  const [notes, setNotes] = useState(initialNotes);
   const [localPatient, setLocalPatient] = useState(patient);
   const [localDoctor, setLocalDoctor] = useState(doctorName);
   const [saved, setSaved] = useState(false);
@@ -114,6 +114,8 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
 
   useEffect(() => {
     if (open) {
+      setNotes(initialNotes);
+      setHeader(initialLetterhead);
       setLocalPatient(patient);
       setLocalDoctor(doctorName);
       setEditing(false);

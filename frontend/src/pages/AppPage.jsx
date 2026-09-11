@@ -19,6 +19,8 @@ import api from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { buildIggPrestazioni } from "../lib/iggPrestazioni";
 
+const DEFAULT_LETTERHEAD = "Laboratorio Analisi — Promemoria prelievo allergologico";
+
 export default function AppPage() {
   const { user } = useAuth();
   const [allergens, setAllergens] = useState([]);
@@ -29,6 +31,8 @@ export default function AppPage() {
   const [patient, setPatient] = useState({ first_name: "", last_name: "", dob: "" });
   const [doctorName, setDoctorName] = useState(user?.name || "");
   const [aggregation, setAggregation] = useState({ codes: [], total: 0, molecular_count: 0, standard_count: 0 });
+  const [reportNotes, setReportNotes] = useState("");
+  const [reportLetterhead, setReportLetterhead] = useState(DEFAULT_LETTERHEAD);
   const [reportOpen, setReportOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState("all");
@@ -81,6 +85,8 @@ export default function AppPage() {
 
   const startNewReport = () => {
     setEditingReportId(null);
+    setReportNotes("");
+    setReportLetterhead(DEFAULT_LETTERHEAD);
     setSelectedCodes([]);
     setPatient({ first_name: "", last_name: "", dob: "" });
     setDoctorName(user?.name || "");
@@ -101,10 +107,10 @@ export default function AppPage() {
   const saveReport = async (overrides) => {
     const body = {
       patient: overrides?.patient || patient,
-      doctor_name: overrides?.doctor_name || doctorName,
+      doctor_name: overrides?.doctor_name ?? doctorName,
       allergen_codes: selectedCodes,
-      notes: overrides?.notes || "",
-      letterhead: overrides?.letterhead || "",
+      notes: overrides?.notes ?? reportNotes,
+      letterhead: overrides?.letterhead ?? reportLetterhead,
       report_type: workspaceType,
     };
     try {
@@ -120,6 +126,10 @@ export default function AppPage() {
         toast.success("Report salvato nello storico");
       }
       loadHistory();
+      setPatient(saved?.patient ?? body.patient);
+      setDoctorName(saved?.doctor_name ?? body.doctor_name);
+      setReportNotes(saved?.notes ?? body.notes);
+      setReportLetterhead(saved?.letterhead ?? body.letterhead);
       return saved || true;
     } catch {
       toast.error("Errore nel salvataggio del report");
@@ -145,7 +155,9 @@ export default function AppPage() {
     setWorkspaceType(type);
     setSelectedCodes(codes);
     setPatient(rep.patient || { first_name: "", last_name: "", dob: "" });
-    setDoctorName(rep.doctor_name || doctorName);
+    setDoctorName(rep.doctor_name ?? "");
+    setReportNotes(rep.notes ?? "");
+    setReportLetterhead(rep.letterhead ?? DEFAULT_LETTERHEAD);
     if (type === "igg") {
       setAggregation(buildIggPrestazioni(codes.length));
     }
@@ -382,6 +394,8 @@ export default function AppPage() {
         patient={patient}
         doctorName={doctorName}
         aggregation={aggregation}
+        initialNotes={reportNotes}
+        initialLetterhead={reportLetterhead}
         onSave={saveReport}
       />
     </div>
