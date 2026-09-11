@@ -7,6 +7,8 @@ const PAGE_MARGIN_TOP = 18;
 const PAGE_MARGIN_BOTTOM = 32;
 const HEADER_HEIGHT = 92;
 const HEADER_GAP = 14;
+const HEADER_LINE_WIDTH = 1;
+const HEADER_LINE_COLOR = "#9ca3af";
 
 const styles = StyleSheet.create({
   page: {
@@ -26,9 +28,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   col: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#9ca3af",
+    borderTopWidth: HEADER_LINE_WIDTH,
+    borderBottomWidth: HEADER_LINE_WIDTH,
+    borderColor: HEADER_LINE_COLOR,
     height: HEADER_HEIGHT,
     justifyContent: "center",
   },
@@ -42,6 +44,7 @@ const styles = StyleSheet.create({
   colTitle: {
     width: "48%",
     alignItems: "stretch",
+    justifyContent: "flex-start",
   },
   colMeta: {
     width: "30%",
@@ -59,17 +62,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 6,
   },
-  metaDivider: {
-    height: 1,
-    backgroundColor: "#6b7280",
-    width: "100%",
+  metaCellLined: {
+    borderTopWidth: HEADER_LINE_WIDTH,
+    borderColor: HEADER_LINE_COLOR,
   },
   logo: {
     width: 90,
     height: 52,
   },
   titleMain: {
-    flexGrow: 1,
+    flexGrow: 3,
+    flexShrink: 1,
+    flexBasis: 0,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 8,
@@ -83,10 +87,12 @@ const styles = StyleSheet.create({
     lineHeight: 1.2,
   },
   moduloWrap: {
-    borderTopWidth: 1.5,
-    borderTopColor: "#4b5563",
-    borderStyle: "solid",
-    paddingVertical: 4,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    justifyContent: "center",
+    borderTopWidth: HEADER_LINE_WIDTH,
+    borderColor: HEADER_LINE_COLOR,
   },
   modulo: {
     textAlign: "center",
@@ -240,19 +246,16 @@ function PdfHeader({ cfg, logoSrc }) {
         <View style={styles.metaCell}>
           <Text style={styles.formCode}>{cfg.formCode}</Text>
         </View>
-        <View style={styles.metaDivider} />
-        <View style={styles.metaCell}>
+        <View style={[styles.metaCell, styles.metaCellLined]}>
           <Text
             style={styles.meta}
             render={({ pageNumber, totalPages }) => `PAGINA: ${pageNumber} DI ${totalPages}`}
           />
         </View>
-        <View style={styles.metaDivider} />
-        <View style={styles.metaCell}>
+        <View style={[styles.metaCell, styles.metaCellLined]}>
           <Text style={styles.meta}>REVISIONE: {cfg.revision}</Text>
         </View>
-        <View style={styles.metaDivider} />
-        <View style={styles.metaCell}>
+        <View style={[styles.metaCell, styles.metaCellLined]}>
           <Text style={styles.meta}>DATA: {cfg.date}</Text>
         </View>
       </View>
@@ -266,7 +269,6 @@ export default function ReportPdfDocument({
   patient = {},
   doctorName = "",
   notes = "",
-  letterhead = "",
   aggregation,
   ricette = [],
   logoSrc,
@@ -284,10 +286,6 @@ export default function ReportPdfDocument({
     <Document>
       <Page size="A4" style={styles.page} wrap>
         <PdfHeader cfg={cfg} logoSrc={logoSrc} />
-
-        {letterhead ? (
-          <Text style={{ fontSize: 8, color: "#64748b", marginBottom: 8 }}>{letterhead}</Text>
-        ) : null}
 
         <View style={styles.infoRow}>
           <View style={styles.infoCol}>
