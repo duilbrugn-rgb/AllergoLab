@@ -45,10 +45,24 @@ const styles = StyleSheet.create({
   },
   colMeta: {
     width: "30%",
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    marginLeft: 8,
+  },
+  metaCell: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 6,
-    paddingVertical: 6,
-    marginLeft: 8,
+  },
+  metaDivider: {
+    height: 1,
+    backgroundColor: "#6b7280",
+    width: "100%",
   },
   logo: {
     width: 90,
@@ -68,27 +82,29 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 1.2,
   },
+  moduloWrap: {
+    borderTopWidth: 1.5,
+    borderTopColor: "#4b5563",
+    borderStyle: "solid",
+    paddingVertical: 4,
+  },
   modulo: {
     textAlign: "center",
-    borderTopWidth: 1,
-    borderColor: "#d1d5db",
     fontSize: 8,
+    fontFamily: "Helvetica-Bold",
     letterSpacing: 1.4,
-    color: "#9ca3af",
-    paddingVertical: 4,
+    color: "#374151",
   },
   formCode: {
     fontSize: 10,
     fontFamily: "Helvetica-Bold",
     color: "#374151",
-    marginBottom: 4,
     textAlign: "center",
   },
   meta: {
     fontSize: 8,
     color: "#374151",
     textAlign: "center",
-    marginTop: 2,
   },
   infoRow: {
     flexDirection: "row",
@@ -216,16 +232,29 @@ function PdfHeader({ cfg, logoSrc }) {
           ))}
           <Text style={styles.title}>{cfg.subtitle}</Text>
         </View>
-        <Text style={styles.modulo}>{cfg.modulo}</Text>
+        <View style={styles.moduloWrap}>
+          <Text style={styles.modulo}>{cfg.modulo}</Text>
+        </View>
       </View>
       <View style={[styles.col, styles.colMeta]}>
-        <Text style={styles.formCode}>{cfg.formCode}</Text>
-        <Text
-          style={styles.meta}
-          render={({ pageNumber, totalPages }) => `PAGINA: ${pageNumber} DI ${totalPages}`}
-        />
-        <Text style={styles.meta}>REVISIONE: {cfg.revision}</Text>
-        <Text style={styles.meta}>DATA: {cfg.date}</Text>
+        <View style={styles.metaCell}>
+          <Text style={styles.formCode}>{cfg.formCode}</Text>
+        </View>
+        <View style={styles.metaDivider} />
+        <View style={styles.metaCell}>
+          <Text
+            style={styles.meta}
+            render={({ pageNumber, totalPages }) => `PAGINA: ${pageNumber} DI ${totalPages}`}
+          />
+        </View>
+        <View style={styles.metaDivider} />
+        <View style={styles.metaCell}>
+          <Text style={styles.meta}>REVISIONE: {cfg.revision}</Text>
+        </View>
+        <View style={styles.metaDivider} />
+        <View style={styles.metaCell}>
+          <Text style={styles.meta}>DATA: {cfg.date}</Text>
+        </View>
       </View>
     </View>
   );
