@@ -10,8 +10,9 @@ import logging
 import uuid
 import secrets
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional
-
+from typing import List, Optional, Literal
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 import bcrypt
 import jwt
 import hmac
@@ -29,9 +30,10 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 JWT_SECRET = os.environ['JWT_SECRET']
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 JWT_ALGORITHM = "HS256"
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@allergolab.it')
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+ADMIN_EMAIL = os.environ['ADMIN_EMAIL']
+ADMIN_PASSWORD = os.environ['ADMIN_PASSWORD']
 CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 EMERGENT_SESSION_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
 WEBHOOK_CRON_SECRET = os.environ.get('WEBHOOK_CRON_SECRET', '')
@@ -41,6 +43,9 @@ REPORT_RETENTION_DAYS = 10
 with open(ROOT_DIR / 'allergens.json', 'r', encoding='utf-8') as f:
     SEED_ALLERGENS = json.load(f)
 
+with open(ROOT_DIR / 'specific_igg.json', 'r', encoding='utf-8') as f:
+    SEED_SPECIFIC_IGG = json.load(f)
+
 ALLERGEN_TYPES = ["Alimenti", "Inalanti", "Farmaci", "Veleni", "Allergeni molecolari"]
 
 
@@ -48,6 +53,47 @@ async def fetch_allergens_by_codes(codes):
     docs = await db.allergens.find({"code": {"$in": codes}}, {"_id": 0}).to_list(2000)
     by_code = {d["code"]: d for d in docs}
     return [by_code[c] for c in codes if c in by_code]
+
+
+async def fetch_specific_igg_by_codes(codes):
+    docs = await db.specific_igg.find({"dnlab_code": {"$in": codes}}, {"_id": 0}).to_list(2000)
+    by_code = {d["dnlab_code"]: d for d in docs}
+    return [by_code[c] for c in codes if c in by_code]
+
+
+def build_igg_aggregation(count):
+    n = int(count or 0)
+    if n <= 0:
+        return {"total": 0, "codes": []}
+    return {
+        "total": n,
+        "codes": [{
+            "siss_code": "0090685",
+            "description": "IGG SPECIFICHE ALLERGOLOGICHE",
+            "quantity": n,
+        }],
+    }
+
+
+async def build_report_snapshot(data: "ReportInput"):
+    """Validate selection and build exams snapshot + aggregation for a report."""
+    if data.report_type == "igg":
+        if not data.allergen_codes:
+            raise HTTPException(status_code=400, detail="Seleziona almeno un esame IgG")
+        if len(data.allergen_codes) != len(set(data.allergen_codes)):
+            raise HTTPException(
+                status_code=400,
+                detail="La selezione IgG contiene codici duplicati",
+            )
+        items = await fetch_specific_igg_by_codes(data.allergen_codes)
+        if len(items) != len(data.allergen_codes):
+            raise HTTPException(
+                status_code=400,
+                detail="Uno o più codici IgG selezionati non sono validi",
+            )
+        return items, build_igg_aggregation(len(items)), "igg"
+    items = await fetch_allergens_by_codes(data.allergen_codes)
+    return items, aggregate(items), "ige"
 
 
 async def log_allergen_change(action: str, allergen: dict, user: dict, details: str = ""):
@@ -97,9 +143,18 @@ def create_refresh_token(user_id: str) -> str:
 
 def set_auth_cookies(response: Response, access: str, refresh: str):
     response.set_cookie("access_token", access, httponly=True, secure=True,
-                        samesite="none", max_age=12 * 3600, path="/")
+                        samesite="lax", max_age=12 * 3600, path="/")
     response.set_cookie("refresh_token", refresh, httponly=True, secure=True,
-                        samesite="none", max_age=7 * 24 * 3600, path="/")
+                        samesite="lax", max_age=7 * 24 * 3600, path="/")
+
+
+def resolve_report_type(doc):
+    """Expose missing report_type as 'ige' without mutating stored documents."""
+    if not doc:
+        return doc
+    if not doc.get("report_type"):
+        return {**doc, "report_type": "ige"}
+    return doc
 
 
 def public_user(doc: dict) -> dict:
@@ -132,33 +187,14 @@ async def _user_from_jwt(token):
     return await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
 
 
-def _session_active(session) -> bool:
-    expires_at = session["expires_at"]
-    if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(expires_at)
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    return expires_at >= datetime.now(timezone.utc)
-
-
-async def _user_from_session(token):
-    if not token:
-        return None
-    session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
-    if not session or not _session_active(session):
-        return None
-    return await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
-
 
 async def get_current_user(request: Request) -> dict:
-    # 1) JWT access token (cookie o Bearer)
-    user = await _user_from_jwt(request.cookies.get("access_token") or _bearer_token(request))
+    user = await _user_from_jwt(
+        request.cookies.get("access_token") or _bearer_token(request)
+    )
     if user:
         return user
-    # 2) Token di sessione Google gestito da Emergent (cookie o Bearer)
-    user = await _user_from_session(request.cookies.get("session_token") or _bearer_token(request))
-    if user:
-        return user
+
     raise HTTPException(status_code=401, detail="Non autenticato")
 
 
@@ -180,6 +216,8 @@ class LoginInput(BaseModel):
     email: EmailStr
     password: str
 
+class GoogleLoginInput(BaseModel):
+    credential: str
 
 class PatientInfo(BaseModel):
     first_name: str = ""
@@ -193,6 +231,7 @@ class ReportInput(BaseModel):
     allergen_codes: List[str]
     notes: str = ""
     letterhead: str = ""
+    report_type: Literal["ige", "igg"] = "ige"
 
 
 class AggregateInput(BaseModel):
@@ -257,13 +296,9 @@ async def login(data: LoginInput, response: Response):
 
 
 @api_router.post("/auth/logout")
-async def logout(response: Response, request: Request):
+async def logout(response: Response):
     response.delete_cookie("access_token", path="/")
     response.delete_cookie("refresh_token", path="/")
-    session_token = request.cookies.get("session_token")
-    if session_token:
-        await db.user_sessions.delete_one({"session_token": session_token})
-    response.delete_cookie("session_token", path="/")
     return {"ok": True}
 
 
@@ -281,32 +316,39 @@ async def refresh_token_endpoint(request: Request, response: Response):
             raise HTTPException(status_code=401, detail="Utente non trovato")
         access = create_access_token(user["user_id"], user["email"])
         response.set_cookie("access_token", access, httponly=True, secure=True,
-                            samesite="none", max_age=12 * 3600, path="/")
+                            samesite="lax", max_age=12 * 3600, path="/")
         return {"ok": True}
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Token non valido")
 
 
-@api_router.post("/auth/google/session")
-async def google_session(response: Response, x_session_id: str = Header(None)):
-    if not x_session_id:
-        raise HTTPException(status_code=400, detail="Session ID mancante")
+@api_router.post("/auth/google")
+async def google_login(data: GoogleLoginInput, response: Response):
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="Google Client ID non configurato")
+
     try:
-        r = requests.get(EMERGENT_SESSION_URL, headers={"X-Session-ID": x_session_id}, timeout=10)
+        payload = id_token.verify_oauth2_token(
+            data.credential,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
     except Exception:
-        raise HTTPException(status_code=502, detail="Errore contattando il servizio di autenticazione")
-    if r.status_code != 200:
-        raise HTTPException(status_code=401, detail="Sessione Google non valida")
-    data = r.json()
-    email = data["email"].lower().strip()
-    name = data.get("name", "") or email.split("@")[0]
-    picture = data.get("picture", "")
-    session_token = data["session_token"]
+        raise HTTPException(status_code=401, detail="Token Google non valido")
+
+    email = (payload.get("email") or "").lower().strip()
+    if not email:
+        raise HTTPException(status_code=401, detail="Email Google non disponibile")
+
+    name = payload.get("name") or email.split("@")[0]
+    picture = payload.get("picture", "")
 
     user = await db.users.find_one({"email": email})
+
     if not user:
         parts = name.split(" ", 1)
         user_id = f"user_{uuid.uuid4().hex[:12]}"
+
         user = {
             "user_id": user_id,
             "email": email,
@@ -319,21 +361,25 @@ async def google_session(response: Response, x_session_id: str = Header(None)):
             "picture": picture,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
+
         await db.users.insert_one(user)
     else:
-        if picture and not user.get("picture"):
-            await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"picture": picture}})
+        updates = {}
 
-    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-    await db.user_sessions.update_one(
-        {"session_token": session_token},
-        {"$set": {"user_id": user["user_id"], "session_token": session_token,
-                  "expires_at": expires_at.isoformat(),
-                  "created_at": datetime.now(timezone.utc).isoformat()}},
-        upsert=True,
-    )
-    response.set_cookie("session_token", session_token, httponly=True, secure=True,
-                        samesite="none", max_age=7 * 24 * 3600, path="/")
+        if picture and picture != user.get("picture"):
+            updates["picture"] = picture
+
+        if updates:
+            await db.users.update_one(
+                {"user_id": user["user_id"]},
+                {"$set": updates},
+            )
+
+    access = create_access_token(user["user_id"], email)
+    refresh = create_refresh_token(user["user_id"])
+
+    set_auth_cookies(response, access, refresh)
+
     return public_user(user)
 
 
@@ -348,6 +394,11 @@ async def get_allergens(user: dict = Depends(get_current_user)):
     return await db.allergens.find({}, {"_id": 0}).sort("code", 1).to_list(2000)
 
 
+@api_router.get("/specific-igg")
+async def get_specific_igg(user: dict = Depends(get_current_user)):
+    return await db.specific_igg.find({}, {"_id": 0}).sort("dnlab_code", 1).to_list(2000)
+
+
 # --- Aggregation ---
 @api_router.post("/aggregate")
 async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current_user)):
@@ -358,8 +409,7 @@ async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current
 # --- Reports ---
 @api_router.post("/reports")
 async def create_report(data: ReportInput, user: dict = Depends(get_current_user)):
-    items = await fetch_allergens_by_codes(data.allergen_codes)
-    agg = aggregate(items)
+    items, agg, report_type = await build_report_snapshot(data)
     report_id = f"rep_{uuid.uuid4().hex[:12]}"
     doc = {
         "report_id": report_id,
@@ -371,6 +421,7 @@ async def create_report(data: ReportInput, user: dict = Depends(get_current_user
         "allergen_codes": data.allergen_codes,
         "allergens": items,
         "aggregation": agg,
+        "report_type": report_type,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.reports.insert_one(doc)
@@ -378,10 +429,47 @@ async def create_report(data: ReportInput, user: dict = Depends(get_current_user
     return doc
 
 
+@api_router.put("/reports/{report_id}")
+async def update_report(report_id: str, data: ReportInput, user: dict = Depends(get_current_user)):
+    existing = await db.reports.find_one(
+        {"report_id": report_id, "user_id": user["user_id"]},
+        {"_id": 0},
+    )
+    if not existing:
+        raise HTTPException(status_code=404, detail="Report non trovato")
+    existing_type = resolve_report_type(existing).get("report_type", "ige")
+    if existing_type != data.report_type:
+        raise HTTPException(
+            status_code=400,
+            detail="Non è possibile cambiare il tipo di un report esistente",
+        )
+    items, agg, report_type = await build_report_snapshot(data)
+    updates = {
+        "patient": data.patient.model_dump(),
+        "doctor_name": data.doctor_name,
+        "notes": data.notes,
+        "letterhead": data.letterhead,
+        "allergen_codes": data.allergen_codes,
+        "allergens": items,
+        "aggregation": agg,
+        "report_type": report_type,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.reports.update_one(
+        {"report_id": report_id, "user_id": user["user_id"]},
+        {"$set": updates},
+    )
+    doc = await db.reports.find_one(
+        {"report_id": report_id, "user_id": user["user_id"]},
+        {"_id": 0},
+    )
+    return resolve_report_type(doc)
+
+
 @api_router.get("/reports")
 async def list_reports(user: dict = Depends(get_current_user)):
     docs = await db.reports.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(200)
-    return docs
+    return [resolve_report_type(d) for d in docs]
 
 
 @api_router.get("/reports/{report_id}")
@@ -389,7 +477,7 @@ async def get_report(report_id: str, user: dict = Depends(get_current_user)):
     doc = await db.reports.find_one({"report_id": report_id, "user_id": user["user_id"]}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Report non trovato")
-    return doc
+    return resolve_report_type(doc)
 
 
 @api_router.delete("/reports/{report_id}")
@@ -536,15 +624,18 @@ async def _purge_old_reports():
                 res.deleted_count, REPORT_RETENTION_DAYS)
 
 
-@api_router.post("/cron/purge-old-reports")
-async def cron_purge_old_reports(request: Request, background_tasks: BackgroundTasks):
-    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+@api_router.get("/cron/purge-old-reports")
+async def cron_purge_old_reports(request: Request):
     auth = request.headers.get("Authorization", "")
     token = auth[7:] if auth.startswith("Bearer ") else ""
-    if not WEBHOOK_CRON_SECRET or not hmac.compare_digest(token, WEBHOOK_CRON_SECRET):
+
+    cron_secret = os.environ.get("CRON_SECRET") or WEBHOOK_CRON_SECRET
+
+    if not cron_secret or not hmac.compare_digest(token, cron_secret):
         raise HTTPException(status_code=401, detail="Non autorizzato")
-    background_tasks.add_task(_purge_old_reports)
-    return {"accepted": True}
+
+    await _purge_old_reports()
+    return {"ok": True}
 
 
 @api_router.get("/")
@@ -567,13 +658,36 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
-    await db.user_sessions.create_index("session_token")
     await db.reports.create_index("user_id")
     await db.allergens.create_index("code", unique=True)
-    if await db.allergens.count_documents({}) == 0:
-        await db.allergens.insert_many([dict(a) for a in SEED_ALLERGENS])
-        logger.info("Seeded %d allergens", len(SEED_ALLERGENS))
-    # Seed admin/owner
+    await db.specific_igg.create_index("dnlab_code", unique=True)
+
+    inserted = 0
+    for allergen in SEED_ALLERGENS:
+        result = await db.allergens.update_one(
+            {"code": allergen["code"]},
+            {"$setOnInsert": dict(allergen)},
+            upsert=True,
+        )
+        if result.upserted_id is not None:
+            inserted += 1
+
+    if inserted:
+        logger.info("Seeded %d allergens", inserted)
+
+    igg_inserted = 0
+    for item in SEED_SPECIFIC_IGG:
+        result = await db.specific_igg.update_one(
+            {"dnlab_code": item["dnlab_code"]},
+            {"$setOnInsert": dict(item)},
+            upsert=True,
+        )
+        if result.upserted_id is not None:
+            igg_inserted += 1
+
+    if igg_inserted:
+        logger.info("Seeded %d specific IgG", igg_inserted)
+
     existing = await db.users.find_one({"email": ADMIN_EMAIL.lower()})
     if existing is None:
         await db.users.insert_one({
@@ -589,10 +703,6 @@ async def startup():
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
         logger.info("Admin seeded: %s", ADMIN_EMAIL)
-    elif existing.get("password_hash") and not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-        await db.users.update_one({"email": ADMIN_EMAIL.lower()},
-                                  {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}})
-
 
 @app.on_event("shutdown")
 async def shutdown():

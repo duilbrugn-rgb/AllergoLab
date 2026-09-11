@@ -1,0 +1,33 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "create-react-app"
+    },
+    "backend": {
+      "root": "backend/",
+      "entrypoint": "server:app"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/purge-old-reports",
+      "schedule": "0 3 * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ]
+}

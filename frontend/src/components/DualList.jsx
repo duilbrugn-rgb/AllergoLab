@@ -18,7 +18,13 @@ function CategoryPill({ type }) {
   );
 }
 
-export default function DualList({ allergens, selectedCodes, setSelectedCodes }) {
+export default function DualList({
+  allergens,
+  selectedCodes,
+  setSelectedCodes,
+  codeField = "code",
+  showCategoryFilters = true,
+}) {
   const [sourceSearch, setSourceSearch] = useState("");
   const [selectedSearch, setSelectedSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
@@ -33,32 +39,34 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
   const filteredSource = useMemo(() => {
     const q = sourceSearch.trim().toLowerCase();
     return allergens.filter((a) => {
-      if (selectedSet.has(a.code)) return false;
-      if (activeFilters.length && !activeFilters.includes(a.type)) return false;
+      if (selectedSet.has(a[codeField])) return false;
+      if (showCategoryFilters && activeFilters.length && !activeFilters.includes(a.type)) return false;
       if (!q) return true;
       return (
-        a.code.toLowerCase().includes(q) ||
+        a[codeField].toLowerCase().includes(q) ||
         a.name.toLowerCase().includes(q) ||
         (a.siss_code || "").toLowerCase().includes(q)
       );
     });
-  }, [allergens, sourceSearch, activeFilters, selectedSet]);
+  }, [allergens, sourceSearch, activeFilters, selectedSet, codeField, showCategoryFilters]);
 
   const selectedItems = useMemo(() => {
     const q = selectedSearch.trim().toLowerCase();
-    const byCode = new Map(allergens.map((a) => [a.code, a]));
+    const byCode = new Map(allergens.map((a) => [a[codeField], a]));
     return selectedCodes
       .map((c) => byCode.get(c))
       .filter(Boolean)
       .filter((a) =>
         !q
           ? true
-          : a.code.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+          : a[codeField].toLowerCase().includes(q) ||
+            a.name.toLowerCase().includes(q) ||
+            (!showCategoryFilters && (a.siss_code || "").toLowerCase().includes(q))
       );
-  }, [selectedCodes, selectedSearch, allergens]);
+  }, [selectedCodes, selectedSearch, allergens, codeField, showCategoryFilters]);
 
   const addAllVisible = () => {
-    const codes = filteredSource.map((a) => a.code);
+    const codes = filteredSource.map((a) => a[codeField]);
     if (!codes.length) return;
     setSelectedCodes([...selectedCodes, ...codes]);
   };
@@ -101,6 +109,7 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
               </button>
             )}
           </div>
+          {showCategoryFilters && (
           <div className="flex flex-wrap gap-1.5">
             {CATEGORY_ORDER.map((type) => {
               const c = CATEGORIES[type];
@@ -122,23 +131,26 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
               );
             })}
           </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto max-h-[52vh] divide-y divide-slate-50">
-          {filteredSource.map((a) => (
+          {filteredSource.map((a) => {
+            const code = a[codeField];
+            return (
             <button
-              key={a.code}
+              key={code}
               type="button"
-              onClick={() => addSingle(a.code)}
-              data-testid={`add-allergen-${a.code}`}
+              onClick={() => addSingle(code)}
+              data-testid={`add-allergen-${code}`}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-sky-50 group transition-colors"
             >
-              <div className="flex-1 min-w-0" data-testid={`source-allergen-item-${a.code}`}>
+              <div className="flex-1 min-w-0" data-testid={`source-allergen-item-${code}`}>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-semibold text-slate-500">
-                    {a.code}
+                    {code}
                   </span>
-                  <CategoryPill type={a.type} />
+                  {showCategoryFilters && <CategoryPill type={a.type} />}
                 </div>
                 <p className="text-sm text-slate-800 truncate">{a.name}</p>
               </div>
@@ -149,7 +161,8 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
                 <ArrowRight className="h-4 w-4" />
               </span>
             </button>
-          ))}
+            );
+          })}
           {!filteredSource.length && (
             <p className="p-6 text-center text-sm text-slate-400">
               Nessun allergene trovato
@@ -195,31 +208,34 @@ export default function DualList({ allergens, selectedCodes, setSelectedCodes })
         </div>
 
         <div className="flex-1 overflow-y-auto max-h-[52vh] divide-y divide-slate-50">
-          {selectedItems.map((a) => (
+          {selectedItems.map((a) => {
+            const code = a[codeField];
+            return (
             <div
-              key={a.code}
-              data-testid={`selected-allergen-item-${a.code}`}
+              key={code}
+              data-testid={`selected-allergen-item-${code}`}
               className="flex items-start gap-2.5 px-3 py-2 hover:bg-rose-50/40 group"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-semibold text-slate-500">
-                    {a.code}
+                    {code}
                   </span>
-                  <CategoryPill type={a.type} />
+                  {showCategoryFilters && <CategoryPill type={a.type} />}
                 </div>
                 <p className="text-sm text-slate-800 truncate">{a.name}</p>
               </div>
               <button
-                onClick={() => removeOne(a.code)}
-                data-testid={`remove-allergen-${a.code}`}
+                onClick={() => removeOne(code)}
+                data-testid={`remove-allergen-${code}`}
                 className="text-slate-300 group-hover:text-rose-600 transition-colors"
                 title="Rimuovi"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-          ))}
+            );
+          })}
           {!selectedItems.length && (
             <p className="p-6 text-center text-sm text-slate-400">
               Nessun esame selezionato. Aggiungi allergeni dal catalogo.

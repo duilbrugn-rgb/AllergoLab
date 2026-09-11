@@ -1,15 +1,17 @@
 import { useState, useEffect, useMemo, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Printer, Pencil, Check, FileText } from "lucide-react";
+import { pdf } from "@react-pdf/renderer";
+import { Printer, Pencil, Check, FileText, Download, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
 import { CATEGORY_ORDER } from "../lib/categories";
+import { getReportTypeConfig } from "../lib/reportTypes";
+import { buildReportPdfFilename, getReportPdfLogoSrc, buildReportPdfSignature } from "../lib/reportPdf";
+import ReportPdfDocument from "./ReportPdfDocument";
 
-const FORM_CODE = "Mod-LABCENT13.08.01.01";
-const REVISIONE = "00";
-const DATA_MODULO = "04/09/2026";
 const PAGE_CONTENT_PX = 880; // altezza utile per pagina (A4 meno header/margini)
 const CHUNK = 24; // esami per blocco (evita overflow di una categoria lunga)
 
@@ -71,7 +73,7 @@ function RicetteBox({ ricette }) {
   );
 }
 
-function ReportHeader({ page, total }) {
+function ReportHeader({ page, total, cfg }) {
   return (
     <div className="ph-header">
       <div className="ph-col ph-col-logo">
@@ -79,53 +81,80 @@ function ReportHeader({ page, total }) {
       </div>
       <div className="ph-col ph-col-title">
         <div className="ph-title-main">
-          <div className="ph-title">ALLERGENI</div>
-          <div className="ph-title">PER DETERMINAZIONE</div>
-          <div className="ph-title-sub">IgE SPECIFICHE (RAST)</div>
+          {cfg.titleLines.map((line) => (
+            <div key={line} className="ph-title">{line}</div>
+          ))}
+          <div className="ph-title-sub">{cfg.subtitle}</div>
         </div>
-        <div className="ph-modulo">MODULO</div>
+        <div className="ph-modulo">{cfg.modulo}</div>
       </div>
       <div className="ph-col ph-col-meta">
-        <div className="ph-mod-code">{FORM_CODE}</div>
+        <div className="ph-mod-code">{cfg.formCode}</div>
         <div className="ph-meta-row">PAGINA: {page} DI {total}</div>
-        <div className="ph-meta-row">REVISIONE: {REVISIONE}</div>
-        <div className="ph-meta-row">DATA: {DATA_MODULO}</div>
+        <div className="ph-meta-row">REVISIONE: {cfg.revision}</div>
+        <div className="ph-meta-row">DATA: {cfg.date}</div>
       </div>
     </div>
   );
 }
 
-export default function ReportModal({ open, onOpenChange, allergens, selectedCodes, patient, doctorName, aggregation, onSave }) {
+export default function ReportModal({ open, onOpenChange, allergens, selectedCodes, patient, doctorName, aggregation, onSave, initialNotes = "", initialLetterhead = "", reportType = "ige" }) {
+  const cfg = getReportTypeConfig(reportType);
+  const codeField = cfg.codeField;
   const [editing, setEditing] = useState(false);
-  const [header, setHeader] = useState("Laboratorio Analisi — Promemoria prelievo allergologico");
-  const [notes, setNotes] = useState("");
+  const [header, setHeader] = useState(initialLetterhead);
+  const [notes, setNotes] = useState(initialNotes);
   const [localPatient, setLocalPatient] = useState(patient);
   const [localDoctor, setLocalDoctor] = useState(doctorName);
   const [saved, setSaved] = useState(false);
   const [pages, setPages] = useState([]);
+  const [lastPdfSignature, setLastPdfSignature] = useState(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const measureRefs = useRef([]);
 
   useEffect(() => {
     if (open) {
+      setNotes(initialNotes);
+      setHeader(initialLetterhead);
       setLocalPatient(patient);
       setLocalDoctor(doctorName);
       setEditing(false);
       setSaved(false);
+      setLastPdfSignature(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const byCode = useMemo(() => new Map(allergens.map((a) => [a.code, a])), [allergens]);
+  const byCode = useMemo(
+    () => new Map(allergens.map((a) => [a[codeField], a])),
+    [allergens, codeField]
+  );
   const selectedItems = selectedCodes.map((c) => byCode.get(c)).filter(Boolean);
 
-  const grouped = CATEGORY_ORDER.map((type) => ({
-    type,
-    items: selectedItems.filter((a) => a.type === type),
-  })).filter((g) => g.items.length);
+  const grouped = cfg.groupByCategory
+    ? CATEGORY_ORDER.map((type) => ({
+        type,
+        items: selectedItems.filter((a) => a.type === type),
+      })).filter((g) => g.items.length)
+    : [{ type: null, items: selectedItems }];
 
   const ricette = useMemo(
     () => (aggregation?.codes?.length ? distribuisciRicette(aggregation.codes) : []),
     [aggregation]
+  );
+
+  const pdfSignature = useMemo(
+    () =>
+      buildReportPdfSignature({
+        reportType,
+        patient: localPatient,
+        doctorName: localDoctor,
+        notes,
+        letterhead: header,
+        selectedCodes,
+        aggregation,
+      }),
+    [reportType, localPatient, localDoctor, notes, header, selectedCodes, aggregation]
   );
 
   // Costruisce i blocchi impaginabili del report da stampare
@@ -192,16 +221,18 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
     grouped.forEach((g) => {
       chunk(g.items, CHUNK).forEach((items, ci) => {
         list.push({
-          key: `g-${g.type}-${ci}`,
+          key: `g-${g.type || "list"}-${ci}`,
           el: (
             <div className="pb-group">
+              {g.type ? (
               <p className="pb-group-title">
                 {g.type} · {g.items.length}{ci > 0 ? " (segue)" : ""}
               </p>
+              ) : null}
               <div className="pb-group-grid">
                 {items.map((a) => (
-                  <div key={a.code} className="pb-item">
-                    <span className="pb-item-code">{a.code}</span>
+                  <div key={a[codeField]} className="pb-item">
+                    <span className="pb-item-code">{a[codeField]}</span>
                     <span>{a.name}</span>
                   </div>
                 ))}
@@ -234,7 +265,7 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
 
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localPatient, localDoctor, notes, selectedCodes.join(","), aggregation, ricette]);
+  }, [localPatient, localDoctor, notes, selectedCodes.join(","), aggregation, ricette, codeField, cfg.groupByCategory]);
 
   // Impagina i blocchi in pagine A4 in base all'altezza misurata
   useLayoutEffect(() => {
@@ -256,13 +287,51 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
   }, [blocks, open]);
 
   const handleSave = async () => {
-    await onSave({
+    const result = await onSave({
       patient: localPatient,
       doctor_name: localDoctor,
       notes,
       letterhead: header,
     });
-    setSaved(true);
+    if (result) setSaved(true);
+    return result;
+  };
+
+  const downloadPdf = async () => {
+    setPdfBusy(true);
+    try {
+      const blob = await pdf(
+        <ReportPdfDocument
+          reportType={reportType}
+          selectedItems={selectedItems}
+          patient={localPatient}
+          doctorName={localDoctor}
+          notes={notes}
+          letterhead={header}
+          aggregation={aggregation}
+          ricette={ricette}
+          logoSrc={getReportPdfLogoSrc()}
+        />
+      ).toBlob();
+      const filename = buildReportPdfFilename({ reportType, patient: localPatient });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      setLastPdfSignature(pdfSignature);
+    } catch {
+      toast.error("Errore nella generazione del PDF");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  const handleSaveAndDownload = async () => {
+    const result = await handleSave();
+    if (!result) return;
+    await downloadPdf();
   };
 
   return (
@@ -273,36 +342,63 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
           Anteprima e modifica del report da consegnare al paziente prima della stampa.
         </DialogDescription>
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3 no-print">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-sky-600" />
-            <span className="font-heading font-semibold text-slate-900">Anteprima Report</span>
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-3 no-print">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-sky-600" />
+              <span className="font-heading font-semibold text-slate-900">Anteprima Report</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant={editing ? "default" : "outline"}
+                onClick={() => setEditing((e) => !e)}
+                data-testid="btn-edit-report-button"
+                className={editing ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+              >
+                {editing ? <Check className="h-4 w-4 mr-1.5" /> : <Pencil className="h-4 w-4 mr-1.5" />}
+                {editing ? "Fine modifica" : "Modifica"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleSave} data-testid="btn-save-report-button">
+                {saved ? <Check className="h-4 w-4 mr-1.5 text-emerald-600" /> : null}
+                {saved ? "Salvato" : "Salva"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={downloadPdf}
+                disabled={pdfBusy}
+                data-testid="btn-download-pdf"
+              >
+                <Download className="h-4 w-4 mr-1.5" />
+                Scarica PDF
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSaveAndDownload}
+                disabled={pdfBusy}
+                data-testid="btn-save-and-download-pdf"
+              >
+                <Save className="h-4 w-4 mr-1.5" />
+                Salva e scarica PDF
+              </Button>
+              <Button size="sm" onClick={() => window.print()} data-testid="btn-print-report-button" className="bg-sky-600 hover:bg-sky-700">
+                <Printer className="h-4 w-4 mr-1.5" /> Stampa
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant={editing ? "default" : "outline"}
-              onClick={() => setEditing((e) => !e)}
-              data-testid="btn-edit-report-button"
-              className={editing ? "bg-emerald-600 hover:bg-emerald-700" : ""}
-            >
-              {editing ? <Check className="h-4 w-4 mr-1.5" /> : <Pencil className="h-4 w-4 mr-1.5" />}
-              {editing ? "Fine modifica" : "Modifica"}
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleSave} data-testid="btn-save-report-button">
-              {saved ? <Check className="h-4 w-4 mr-1.5 text-emerald-600" /> : null}
-              {saved ? "Salvato" : "Salva"}
-            </Button>
-            <Button size="sm" onClick={() => window.print()} data-testid="btn-print-report-button" className="bg-sky-600 hover:bg-sky-700">
-              <Printer className="h-4 w-4 mr-1.5" /> Stampa
-            </Button>
-          </div>
+          {lastPdfSignature && lastPdfSignature !== pdfSignature && (
+            <p className="text-xs text-amber-700 mt-2" data-testid="pdf-stale-warning">
+              Report modificato dopo l'ultimo download. Scarica il PDF aggiornato.
+            </p>
+          )}
         </div>
 
         {/* Anteprima a schermo */}
         <div id="allergolab-report" className="px-8 py-6">
           <div className="mb-5">
-            <ReportHeader page={1} total={pages.length || 1} />
+            <ReportHeader page={1} total={pages.length || 1} cfg={cfg} />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mb-6">
@@ -366,14 +462,16 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
           <div className="mb-6">
             <p className="text-sm font-bold text-slate-900 mb-2">Esami richiesti ({selectedItems.length})</p>
             {grouped.map((g) => (
-              <div key={g.type} className="mb-3">
+              <div key={g.type || "list"} className="mb-3">
+                {g.type ? (
                 <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
                   {g.type} · {g.items.length}
                 </p>
+                ) : null}
                 <div className="grid grid-cols-2 gap-x-6 gap-y-0.5">
                   {g.items.map((a) => (
-                    <div key={a.code} className="flex items-baseline gap-2 text-sm">
-                      <span className="font-mono text-xs text-slate-500 w-12 shrink-0">{a.code}</span>
+                    <div key={a[codeField]} className="flex items-baseline gap-2 text-sm">
+                      <span className={`font-mono text-xs text-slate-500 shrink-0 ${cfg.groupByCategory ? "w-12" : ""}`}>{a[codeField]}</span>
                       <span className="text-slate-800">{a.name}</span>
                     </div>
                   ))}
@@ -406,7 +504,7 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
           <div id="print-document">
             {pages.map((idxs, p) => (
               <div className="print-page" key={p}>
-                <ReportHeader page={p + 1} total={pages.length} />
+                <ReportHeader page={p + 1} total={pages.length} cfg={cfg} />
                 <div className="print-body">
                   {idxs.map((i) => (
                     <div key={blocks[i].key}>{blocks[i].el}</div>

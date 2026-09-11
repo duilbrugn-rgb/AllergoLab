@@ -1,0 +1,177 @@
+[
+  {
+    "dnlab_code": "7800_04",
+    "name": "m228 - IgG spec_Aspergillus flavus",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_05",
+    "name": "m3 - IgG spec_Aspergillus fumigatus",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_06",
+    "name": "m207 - IgG spec_Aspergillus niger",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_07",
+    "name": "m36 - IgG spec_Aspergillus terreus",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_09",
+    "name": "m2 - IgG spec_Cladosporium herbarum",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_10",
+    "name": "Ge91 - IgG spec_Escrementi di piccione",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_11",
+    "name": "Gm22 - IgG spec_Micropolyspora faeni",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_13",
+    "name": "m1 - IgG spec_Penicillium notatum",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_14",
+    "name": "e70 - IgG spec_Piume di oca",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_15",
+    "name": "e86 - IgG spec_Piume di anatra",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_16",
+    "name": "e85 - IgG spec_Piume di pollo",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_19",
+    "name": "Ge90 - IgG spec_Siero di pappagallino",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_20",
+    "name": "Ge93 - IgG spec_Siero di piccione",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_21",
+    "name": "e219 - IgG spec_Siero di pollo",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_24",
+    "name": "k77 - IgG spec_Isocianato HDI (HSA)",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_25",
+    "name": "k76 - IgG spec_Isocianato MDI (HSA)",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_26",
+    "name": "k75 - igG spec_Isocianato TDI (HSA)",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_27",
+    "name": "m4 - igG spec_Mucor Racemosus",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_28",
+    "name": "m5 - igG spec_Candida albicans",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_29",
+    "name": "m6 - igG spec_Alternaria alternata",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_30",
+    "name": "m11 - igG spec_Rhizopus nigrans",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_31",
+    "name": "m209 - igG spec_Penicillum glabrum",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_32",
+    "name": "Gm24 - igG spec_Stachybotrys atra",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_33",
+    "name": "f45 - igG spec_Saccharomyces cerevis",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  },
+  {
+    "dnlab_code": "7800_34",
+    "name": "Ge92 - igG spec_Siero di parrocchetto",
+    "type": "IgG specifiche",
+    "siss_code": "0090685",
+    "siss_description": "IGG SPECIFICHE ALLERGOLOGICHE"
+  }
+]
