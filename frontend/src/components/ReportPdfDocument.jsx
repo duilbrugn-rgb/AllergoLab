@@ -271,12 +271,15 @@ export default function ReportPdfDocument({
 }) {
   const cfg = getReportTypeConfig(reportType);
   const codeField = cfg.codeField;
+  const sortedItems = [...selectedItems].sort((a, b) =>
+    a[codeField].localeCompare(b[codeField], "it", { numeric: true })
+  );
   const grouped = cfg.groupByCategory
     ? CATEGORY_ORDER.map((type) => ({
         type,
-        items: selectedItems.filter((a) => a.type === type),
+        items: sortedItems.filter((a) => a.type === type),
       })).filter((g) => g.items.length)
-    : [{ type: null, items: selectedItems }];
+    : [{ type: null, items: sortedItems }];
 
   return (
     <Document>

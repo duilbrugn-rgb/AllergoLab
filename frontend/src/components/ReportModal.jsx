@@ -129,7 +129,8 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
     () => new Map(allergens.map((a) => [a[codeField], a])),
     [allergens, codeField]
   );
-  const selectedItems = selectedCodes.map((c) => byCode.get(c)).filter(Boolean);
+  const selectedItems = selectedCodes.map((c) => byCode.get(c)).filter(Boolean)
+    .sort((a, b) => a[codeField].localeCompare(b[codeField], "it", { numeric: true }));
 
   const grouped = cfg.groupByCategory
     ? CATEGORY_ORDER.map((type) => ({

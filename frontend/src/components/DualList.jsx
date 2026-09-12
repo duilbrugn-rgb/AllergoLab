@@ -38,7 +38,10 @@ export default function DualList({
 
   const filteredSource = useMemo(() => {
     const q = sourceSearch.trim().toLowerCase();
-    return allergens.filter((a) => {
+    return [...allergens].sort((a, b) =>
+      a.name.localeCompare(b.name, "it", { sensitivity: "base" }) ||
+      a[codeField].localeCompare(b[codeField], "it", { numeric: true })
+    ).filter((a) => {
       if (selectedSet.has(a[codeField])) return false;
       if (showCategoryFilters && activeFilters.length && !activeFilters.includes(a.type)) return false;
       if (!q) return true;
