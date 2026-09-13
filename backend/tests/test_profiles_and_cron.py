@@ -5,8 +5,8 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://allergen-selector.preview.emergentagent.com").rstrip("/")
-ADMIN_EMAIL = "duilbrugn@gmail.com"
-ADMIN_PASSWORD = "AllergoLab2026!"
+ADMIN_EMAIL = os.environ["ADMIN_EMAIL"]
+ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
 CRON_SECRET = "k9Qm2Xr7Tp4Ls8Vn3Wd6Yb1Zc5Hg0Jf"
 
 
@@ -108,42 +108,17 @@ class TestProfileCRUD:
         assert r.status_code == 404
 
 
-class TestCronPurge:
-    def test_no_auth(self):
+class TestCronPurgeRemoved:
+    def test_purge_endpoint_is_gone(self):
         r = requests.post(f"{BASE_URL}/api/cron/purge-old-reports")
-        assert r.status_code == 401
-
-    def test_wrong_secret(self):
-        r = requests.post(f"{BASE_URL}/api/cron/purge-old-reports",
-                          headers={"Authorization": "Bearer wrong"})
-        assert r.status_code == 401
-
-    def test_correct_secret_and_recent_report_preserved(self, admin_client, sample_codes):
-        # Create a report NOW
-        r = admin_client.post(f"{BASE_URL}/api/reports", json={
-            "patient": {"first_name": "zTEST", "last_name": "Patient", "dob": "2000-01-01"},
-            "doctor_name": "zTEST Doc",
-            "allergen_codes": sample_codes[:2],
-            "notes": "", "letterhead": ""
-        })
-        assert r.status_code == 200, r.text
-        rid = r.json()["report_id"]
-
-        # Call cron
-        r2 = requests.post(f"{BASE_URL}/api/cron/purge-old-reports",
-                           headers={"Authorization": f"Bearer {CRON_SECRET}"})
-        assert r2.status_code == 200
-        assert r2.json().get("accepted") is True
-
-        # Wait for background task
-        time.sleep(2)
-
-        # Verify recent report still exists
-        r3 = admin_client.get(f"{BASE_URL}/api/reports/{rid}")
-        assert r3.status_code == 200, "Recent report was incorrectly purged!"
-
-        # Cleanup
-        admin_client.delete(f"{BASE_URL}/api/reports/{rid}")
+        assert r.status_code == 404
+        r2 = requests.get(f"{BASE_URL}/api/cron/purge-old-reports")
+        assert r2.status_code == 404
+        r3 = requests.post(
+            f"{BASE_URL}/api/cron/purge-old-reports",
+            headers={"Authorization": f"Bearer {CRON_SECRET}"},
+        )
+        assert r3.status_code == 404
 
 
 class TestSISSInvariance:

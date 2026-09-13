@@ -36,9 +36,7 @@ export function getReportPdfLogoSrc() {
 export function buildReportPdfSignature({
   reportType,
   patient,
-  doctorName,
   notes,
-  letterhead,
   selectedCodes,
   aggregation,
 }) {
@@ -49,9 +47,7 @@ export function buildReportPdfSignature({
       last_name: patient?.last_name || "",
       dob: patient?.dob || "",
     },
-    doctorName: doctorName || "",
     notes: notes || "",
-    letterhead: letterhead || "",
     selectedCodes: [...(selectedCodes || [])],
     aggregation: aggregation
       ? {

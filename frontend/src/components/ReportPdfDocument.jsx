@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.6,
     borderColor: "#94a3b8",
     paddingTop: 4,
-    width: 180,
+    width: 260,
     textAlign: "center",
   },
 });
@@ -263,7 +263,6 @@ export default function ReportPdfDocument({
   reportType = "ige",
   selectedItems = [],
   patient = {},
-  doctorName = "",
   notes = "",
   aggregation,
   ricette = [],
@@ -291,10 +290,6 @@ export default function ReportPdfDocument({
             <Text style={styles.label}>Paziente</Text>
             <Text style={styles.value}>{patient.first_name || ""} {patient.last_name || ""}</Text>
             <Text style={styles.sub}>Nato/a il {fmtDate(patient.dob)}</Text>
-          </View>
-          <View style={styles.infoCol}>
-            <Text style={styles.label}>Medico richiedente</Text>
-            <Text style={styles.value}>{doctorName || "—"}</Text>
           </View>
         </View>
 
@@ -348,7 +343,7 @@ export default function ReportPdfDocument({
         </View>
 
         <View style={styles.sign}>
-          <Text style={styles.signLine}>Firma del medico</Text>
+          <Text style={styles.signLine}>Firma e timbro del medico prescrittore</Text>
         </View>
       </Page>
     </Document>

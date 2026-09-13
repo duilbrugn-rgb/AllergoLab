@@ -145,40 +145,11 @@ class TestAdminCRUDAllergens:
         assert r.status_code == 404
 
 
-class TestReportIsolation:
-    def test_user_sees_only_own_reports(self, admin_session, user_session, user_session_2):
-        # admin creates a report
+class TestReportsRemoved:
+    def test_reports_endpoints_are_gone(self, admin_session, user_session):
         payload = {"patient": {"first_name": "TEST_Adm", "last_name": "P", "dob": ""},
-                   "doctor_name": "Adm", "allergen_codes": ["f1"], "notes": "", "letterhead": ""}
-        ra = admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15)
-        assert ra.status_code == 200
-        admin_rep_id = ra.json()["report_id"]
-
-        # user1 creates its own
-        pu = {"patient": {"first_name": "TEST_U1", "last_name": "P", "dob": ""},
-              "doctor_name": "U1", "allergen_codes": ["f2"], "notes": "", "letterhead": ""}
-        r1 = user_session.post(f"{BASE_URL}/api/reports", json=pu, timeout=15)
-        assert r1.status_code == 200
-        u1_rep_id = r1.json()["report_id"]
-
-        # user2 has no reports initially -> should see only their own
-        r2list = user_session_2.get(f"{BASE_URL}/api/reports", timeout=15).json()
-        assert all(x["report_id"] != admin_rep_id for x in r2list)
-        assert all(x["report_id"] != u1_rep_id for x in r2list)
-
-        # user1 sees own, not admin's
-        r1list = user_session.get(f"{BASE_URL}/api/reports", timeout=15).json()
-        assert any(x["report_id"] == u1_rep_id for x in r1list)
-        assert all(x["report_id"] != admin_rep_id for x in r1list)
-
-        # user1 cannot GET admin's report
-        r_forbidden = user_session.get(f"{BASE_URL}/api/reports/{admin_rep_id}", timeout=15)
-        assert r_forbidden.status_code == 404
-
-        # user1 cannot DELETE admin's report
-        r_del = user_session.delete(f"{BASE_URL}/api/reports/{admin_rep_id}", timeout=15)
-        assert r_del.status_code == 404
-
-        # cleanup
-        admin_session.delete(f"{BASE_URL}/api/reports/{admin_rep_id}", timeout=15)
-        user_session.delete(f"{BASE_URL}/api/reports/{u1_rep_id}", timeout=15)
+                   "allergen_codes": ["f1"], "notes": ""}
+        assert admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15).status_code == 404
+        assert user_session.get(f"{BASE_URL}/api/reports", timeout=15).status_code == 404
+        assert user_session.get(f"{BASE_URL}/api/reports/rep_x", timeout=15).status_code == 404
+        assert user_session.delete(f"{BASE_URL}/api/reports/rep_x", timeout=15).status_code == 404

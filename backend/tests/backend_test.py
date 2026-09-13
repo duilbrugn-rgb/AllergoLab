@@ -88,14 +88,22 @@ class TestAuth:
                           json={"email": ADMIN_EMAIL, "password": "wrong"}, timeout=15)
         assert r.status_code == 401
 
-    def test_google_session_missing_header(self):
-        r = requests.post(f"{BASE_URL}/api/auth/google/session", timeout=15)
-        assert r.status_code == 400
+    def test_google_requires_credential(self):
+        r = requests.post(f"{BASE_URL}/api/auth/google", json={}, timeout=15)
+        assert r.status_code == 422, r.text
+        assert any(
+            error["loc"] == ["body", "credential"]
+            and error["type"] == "missing"
+            for error in r.json()["detail"]
+        )
 
-    def test_google_session_invalid_id(self):
-        r = requests.post(f"{BASE_URL}/api/auth/google/session",
-                          headers={"X-Session-ID": "invalid_" + uuid.uuid4().hex}, timeout=15)
-        assert r.status_code in (401, 502)
+    def test_legacy_google_session_is_removed(self):
+        r = requests.post(
+            f"{BASE_URL}/api/auth/google/session",
+            headers={"X-Session-ID": "invalid_" + uuid.uuid4().hex},
+            timeout=15,
+        )
+        assert r.status_code == 404, r.text
 
     def test_allergens_requires_auth(self):
         r = requests.get(f"{BASE_URL}/api/allergens", timeout=15)
@@ -172,38 +180,28 @@ class TestAggregate:
         assert cm["009068D"]["quantity"] == 1
 
 
-# ---------- Reports CRUD ----------
-class TestReports:
-    def test_create_list_get_delete(self, admin_session):
+# ---------- Reports persistence removed ----------
+class TestReportsRemoved:
+    def test_reports_endpoints_are_gone(self, admin_session):
         payload = {
             "patient": {"first_name": "TEST_Pat", "last_name": "Rossi", "dob": "1990-01-01"},
-            "doctor_name": "Dr TEST",
             "allergen_codes": ["f1", "f2"],
             "notes": "test notes",
-            "letterhead": ""
         }
-        r = admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15)
-        assert r.status_code == 200, r.text
-        rep = r.json()
-        assert "report_id" in rep
-        assert rep["patient"]["first_name"] == "TEST_Pat"
-        assert "aggregation" in rep
-        report_id = rep["report_id"]
+        assert admin_session.post(f"{BASE_URL}/api/reports", json=payload, timeout=15).status_code == 404
+        assert admin_session.get(f"{BASE_URL}/api/reports", timeout=15).status_code == 404
+        assert admin_session.get(f"{BASE_URL}/api/reports/rep_x", timeout=15).status_code == 404
+        assert admin_session.put(f"{BASE_URL}/api/reports/rep_x", json=payload, timeout=15).status_code == 404
+        assert admin_session.delete(f"{BASE_URL}/api/reports/rep_x", timeout=15).status_code == 404
 
-        # list
-        r2 = admin_session.get(f"{BASE_URL}/api/reports", timeout=15)
-        assert r2.status_code == 200
-        assert any(x["report_id"] == report_id for x in r2.json())
-
-        # get single
-        r3 = admin_session.get(f"{BASE_URL}/api/reports/{report_id}", timeout=15)
-        assert r3.status_code == 200
-        assert r3.json()["report_id"] == report_id
-
-        # delete
-        r4 = admin_session.delete(f"{BASE_URL}/api/reports/{report_id}", timeout=15)
-        assert r4.status_code == 200
-
-        # 404 after delete
-        r5 = admin_session.get(f"{BASE_URL}/api/reports/{report_id}", timeout=15)
-        assert r5.status_code == 404
+    def test_aggregate_rejects_patient_fields(self, admin_session):
+        r = admin_session.post(
+            f"{BASE_URL}/api/aggregate",
+            json={
+                "codes": ["f1"],
+                "patient": {"first_name": "Mario", "last_name": "Rossi", "dob": "1990-01-01"},
+                "notes": "secret",
+            },
+            timeout=15,
+        )
+        assert r.status_code == 422
