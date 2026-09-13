@@ -20,6 +20,7 @@ import { useAuth } from "../context/AuthContext";
 import { buildIggPrestazioni } from "../lib/iggPrestazioni";
 import { applyPrescriptionReset, emptyAggregation } from "../lib/prescription";
 
+
 export default function AppPage() {
   const { user, logout } = useAuth();
   const [allergens, setAllergens] = useState([]);
