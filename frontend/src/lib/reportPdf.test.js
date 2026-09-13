@@ -1,4 +1,4 @@
-import { buildReportPdfFilename, sanitizePdfFilenamePart } from "./reportPdf";
+import { buildReportPdfFilename, buildReportPdfSignature, sanitizePdfFilenamePart } from "./reportPdf";
 import { getReportTypeConfig } from "./reportTypes";
 
 describe("report PDF helpers", () => {
@@ -31,5 +31,24 @@ describe("report PDF helpers", () => {
     const cfg = getReportTypeConfig("ige");
     expect(cfg.codeField).toBe("code");
     expect(cfg.groupByCategory).toBe(true);
+  });
+
+  test("PDF signature uses only local patient state and no doctor name", () => {
+    const signature = buildReportPdfSignature({
+      reportType: "ige",
+      patient: { first_name: "Mario", last_name: "Rossi", dob: "1990-01-01" },
+      notes: "note locali",
+      selectedCodes: ["f1"],
+      aggregation: { total: 1, codes: [{ siss_code: "0090681.00", description: "x", quantity: 1 }] },
+    });
+    const parsed = JSON.parse(signature);
+    expect(parsed.patient).toEqual({
+      first_name: "Mario",
+      last_name: "Rossi",
+      dob: "1990-01-01",
+    });
+    expect(parsed.notes).toBe("note locali");
+    expect(parsed).not.toHaveProperty("doctorName");
+    expect(parsed).not.toHaveProperty("letterhead");
   });
 });

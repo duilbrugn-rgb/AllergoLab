@@ -221,7 +221,7 @@ export default function AuthPage() {
                 </div>
                 <p className="flex items-start gap-1.5 text-xs text-slate-500">
                   <UserRound className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                  Nome e Cognome verranno usati come <strong className="mx-1">Medico richiedente</strong> nei report.
+                  Nome e Cognome identificano l'account. Il medico prescrittore non è gestito dall'app: firma e timbro vanno apposti in calce al modulo.
                 </p>
                 <Button type="submit" disabled={loading} className="w-full bg-sky-600 hover:bg-sky-700" data-testid="register-submit-button">
                   {loading ? "Registrazione…" : "Crea account"}

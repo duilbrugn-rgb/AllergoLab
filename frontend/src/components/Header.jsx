@@ -2,8 +2,9 @@ import { FlaskConical, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../context/AuthContext";
 
-export default function Header() {
+export default function Header({ onLogout }) {
   const { user, logout } = useAuth();
+  const handleLogout = onLogout || logout;
   const initials = (user?.name || user?.email || "?")
     .split(" ")
     .map((s) => s[0])
@@ -29,9 +30,9 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col items-end leading-tight" data-testid="header-doctor">
+          <div className="hidden sm:flex flex-col items-end leading-tight" data-testid="header-user">
             <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
-              Medico richiedente
+              Utente
             </span>
             <span className="text-sm font-medium text-slate-800">
               {user?.name || user?.email}
@@ -43,7 +44,7 @@ export default function Header() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={logout}
+            onClick={handleLogout}
             data-testid="logout-button"
             className="text-slate-600 hover:text-rose-600"
           >

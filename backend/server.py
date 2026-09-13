@@ -10,17 +10,16 @@ import logging
 import uuid
 import secrets
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional, Literal
+from typing import List, Optional
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import bcrypt
 import jwt
-import hmac
 import requests
 from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends, Header, BackgroundTasks
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from algorithm import aggregate
 
@@ -36,8 +35,6 @@ ADMIN_EMAIL = os.environ['ADMIN_EMAIL']
 ADMIN_PASSWORD = os.environ['ADMIN_PASSWORD']
 CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 EMERGENT_SESSION_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
-WEBHOOK_CRON_SECRET = os.environ.get('WEBHOOK_CRON_SECRET', '')
-REPORT_RETENTION_DAYS = 10
 
 # Seed source for the allergen dataset (loaded into MongoDB on startup)
 with open(ROOT_DIR / 'allergens.json', 'r', encoding='utf-8') as f:
@@ -53,47 +50,6 @@ async def fetch_allergens_by_codes(codes):
     docs = await db.allergens.find({"code": {"$in": codes}}, {"_id": 0}).to_list(2000)
     by_code = {d["code"]: d for d in docs}
     return [by_code[c] for c in codes if c in by_code]
-
-
-async def fetch_specific_igg_by_codes(codes):
-    docs = await db.specific_igg.find({"dnlab_code": {"$in": codes}}, {"_id": 0}).to_list(2000)
-    by_code = {d["dnlab_code"]: d for d in docs}
-    return [by_code[c] for c in codes if c in by_code]
-
-
-def build_igg_aggregation(count):
-    n = int(count or 0)
-    if n <= 0:
-        return {"total": 0, "codes": []}
-    return {
-        "total": n,
-        "codes": [{
-            "siss_code": "0090685",
-            "description": "IGG SPECIFICHE ALLERGOLOGICHE",
-            "quantity": n,
-        }],
-    }
-
-
-async def build_report_snapshot(data: "ReportInput"):
-    """Validate selection and build exams snapshot + aggregation for a report."""
-    if data.report_type == "igg":
-        if not data.allergen_codes:
-            raise HTTPException(status_code=400, detail="Seleziona almeno un esame IgG")
-        if len(data.allergen_codes) != len(set(data.allergen_codes)):
-            raise HTTPException(
-                status_code=400,
-                detail="La selezione IgG contiene codici duplicati",
-            )
-        items = await fetch_specific_igg_by_codes(data.allergen_codes)
-        if len(items) != len(data.allergen_codes):
-            raise HTTPException(
-                status_code=400,
-                detail="Uno o più codici IgG selezionati non sono validi",
-            )
-        return items, build_igg_aggregation(len(items)), "igg"
-    items = await fetch_allergens_by_codes(data.allergen_codes)
-    return items, aggregate(items), "ige"
 
 
 async def log_allergen_change(action: str, allergen: dict, user: dict, details: str = ""):
@@ -146,15 +102,6 @@ def set_auth_cookies(response: Response, access: str, refresh: str):
                         samesite="lax", max_age=12 * 3600, path="/")
     response.set_cookie("refresh_token", refresh, httponly=True, secure=True,
                         samesite="lax", max_age=7 * 24 * 3600, path="/")
-
-
-def resolve_report_type(doc):
-    """Expose missing report_type as 'ige' without mutating stored documents."""
-    if not doc:
-        return doc
-    if not doc.get("report_type"):
-        return {**doc, "report_type": "ige"}
-    return doc
 
 
 def public_user(doc: dict) -> dict:
@@ -219,22 +166,8 @@ class LoginInput(BaseModel):
 class GoogleLoginInput(BaseModel):
     credential: str
 
-class PatientInfo(BaseModel):
-    first_name: str = ""
-    last_name: str = ""
-    dob: str = ""
-
-
-class ReportInput(BaseModel):
-    patient: PatientInfo
-    doctor_name: str
-    allergen_codes: List[str]
-    notes: str = ""
-    letterhead: str = ""
-    report_type: Literal["ige", "igg"] = "ige"
-
-
 class AggregateInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     codes: List[str]
 
 
@@ -406,88 +339,6 @@ async def aggregate_codes(data: AggregateInput, user: dict = Depends(get_current
     return aggregate(items)
 
 
-# --- Reports ---
-@api_router.post("/reports")
-async def create_report(data: ReportInput, user: dict = Depends(get_current_user)):
-    items, agg, report_type = await build_report_snapshot(data)
-    report_id = f"rep_{uuid.uuid4().hex[:12]}"
-    doc = {
-        "report_id": report_id,
-        "user_id": user["user_id"],
-        "patient": data.patient.model_dump(),
-        "doctor_name": data.doctor_name,
-        "notes": data.notes,
-        "letterhead": data.letterhead,
-        "allergen_codes": data.allergen_codes,
-        "allergens": items,
-        "aggregation": agg,
-        "report_type": report_type,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    await db.reports.insert_one(doc)
-    doc.pop("_id", None)
-    return doc
-
-
-@api_router.put("/reports/{report_id}")
-async def update_report(report_id: str, data: ReportInput, user: dict = Depends(get_current_user)):
-    existing = await db.reports.find_one(
-        {"report_id": report_id, "user_id": user["user_id"]},
-        {"_id": 0},
-    )
-    if not existing:
-        raise HTTPException(status_code=404, detail="Report non trovato")
-    existing_type = resolve_report_type(existing).get("report_type", "ige")
-    if existing_type != data.report_type:
-        raise HTTPException(
-            status_code=400,
-            detail="Non è possibile cambiare il tipo di un report esistente",
-        )
-    items, agg, report_type = await build_report_snapshot(data)
-    updates = {
-        "patient": data.patient.model_dump(),
-        "doctor_name": data.doctor_name,
-        "notes": data.notes,
-        "letterhead": data.letterhead,
-        "allergen_codes": data.allergen_codes,
-        "allergens": items,
-        "aggregation": agg,
-        "report_type": report_type,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-    }
-    await db.reports.update_one(
-        {"report_id": report_id, "user_id": user["user_id"]},
-        {"$set": updates},
-    )
-    doc = await db.reports.find_one(
-        {"report_id": report_id, "user_id": user["user_id"]},
-        {"_id": 0},
-    )
-    return resolve_report_type(doc)
-
-
-@api_router.get("/reports")
-async def list_reports(user: dict = Depends(get_current_user)):
-    docs = await db.reports.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(200)
-    return [resolve_report_type(d) for d in docs]
-
-
-@api_router.get("/reports/{report_id}")
-async def get_report(report_id: str, user: dict = Depends(get_current_user)):
-    doc = await db.reports.find_one({"report_id": report_id, "user_id": user["user_id"]}, {"_id": 0})
-    if not doc:
-        raise HTTPException(status_code=404, detail="Report non trovato")
-    return resolve_report_type(doc)
-
-
-@api_router.delete("/reports/{report_id}")
-async def delete_report(report_id: str, user: dict = Depends(get_current_user)):
-    res = await db.reports.delete_one({"report_id": report_id, "user_id": user["user_id"]})
-    if res.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Report non trovato")
-    return {"ok": True}
-
-
 # --- Admin: gestione catalogo allergeni (solo amministratori) ---
 @api_router.get("/admin/allergens")
 async def admin_list_allergens(user: dict = Depends(get_admin_user)):
@@ -616,28 +467,6 @@ async def admin_delete_profile(profile_id: str, user: dict = Depends(get_admin_u
     return {"ok": True}
 
 
-# --- Cron: cancellazione report in archivio piu' vecchi di 10 giorni ---
-async def _purge_old_reports():
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=REPORT_RETENTION_DAYS)).isoformat()
-    res = await db.reports.delete_many({"created_at": {"$lt": cutoff}})
-    logger.info("Cron purge: eliminati %d report piu' vecchi di %d giorni",
-                res.deleted_count, REPORT_RETENTION_DAYS)
-
-
-@api_router.get("/cron/purge-old-reports")
-async def cron_purge_old_reports(request: Request):
-    auth = request.headers.get("Authorization", "")
-    token = auth[7:] if auth.startswith("Bearer ") else ""
-
-    cron_secret = os.environ.get("CRON_SECRET") or WEBHOOK_CRON_SECRET
-
-    if not cron_secret or not hmac.compare_digest(token, cron_secret):
-        raise HTTPException(status_code=401, detail="Non autorizzato")
-
-    await _purge_old_reports()
-    return {"ok": True}
-
-
 @api_router.get("/")
 async def root():
     count = await db.allergens.count_documents({})
@@ -658,7 +487,6 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
-    await db.reports.create_index("user_id")
     await db.allergens.create_index("code", unique=True)
     await db.specific_igg.create_index("dnlab_code", unique=True)
 

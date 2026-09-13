@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { pdf } from "@react-pdf/renderer";
-import { Printer, Pencil, Check, FileText, Download, Save } from "lucide-react";
+import { Printer, Pencil, Check, FileText, Download } from "lucide-react";
+import { distribuisciRicette } from "../lib/ricette";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -26,29 +27,6 @@ function chunk(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
-}
-
-// Distribuisce i codici SISS su ricette con al massimo `maxPerRicetta` prestazioni ciascuna
-function distribuisciRicette(codes, maxPerRicetta = 8) {
-  const ricette = [];
-  let current = [];
-  let cap = maxPerRicetta;
-  for (const c of codes) {
-    let q = c.quantity;
-    while (q > 0) {
-      const take = Math.min(q, cap);
-      current.push({ siss_code: c.siss_code, description: c.description, quantity: take });
-      cap -= take;
-      q -= take;
-      if (cap === 0) {
-        ricette.push(current);
-        current = [];
-        cap = maxPerRicetta;
-      }
-    }
-  }
-  if (current.length) ricette.push(current);
-  return ricette;
 }
 
 function RicetteBox({ ricette }) {
@@ -98,15 +76,21 @@ function ReportHeader({ page, total, cfg }) {
   );
 }
 
-export default function ReportModal({ open, onOpenChange, allergens, selectedCodes, patient, doctorName, aggregation, onSave, reportType = "ige" }) {
+export default function ReportModal({
+  open,
+  onOpenChange,
+  allergens,
+  selectedCodes,
+  patient,
+  setPatient,
+  notes,
+  setNotes,
+  aggregation,
+  reportType = "ige",
+}) {
   const cfg = getReportTypeConfig(reportType);
   const codeField = cfg.codeField;
   const [editing, setEditing] = useState(false);
-  const [header, setHeader] = useState("Laboratorio Analisi — Promemoria prelievo allergologico");
-  const [notes, setNotes] = useState("");
-  const [localPatient, setLocalPatient] = useState(patient);
-  const [localDoctor, setLocalDoctor] = useState(doctorName);
-  const [saved, setSaved] = useState(false);
   const [pages, setPages] = useState([]);
   const [lastPdfSignature, setLastPdfSignature] = useState(null);
   const [pdfBusy, setPdfBusy] = useState(false);
@@ -114,13 +98,8 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
 
   useEffect(() => {
     if (open) {
-      setLocalPatient(patient);
-      setLocalDoctor(doctorName);
       setEditing(false);
-      setSaved(false);
-      setLastPdfSignature(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const byCode = useMemo(
@@ -145,14 +124,12 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
     () =>
       buildReportPdfSignature({
         reportType,
-        patient: localPatient,
-        doctorName: localDoctor,
+        patient,
         notes,
-        letterhead: header,
         selectedCodes,
         aggregation,
       }),
-    [reportType, localPatient, localDoctor, notes, header, selectedCodes, aggregation]
+    [reportType, patient, notes, selectedCodes, aggregation]
   );
 
   // Costruisce i blocchi impaginabili del report da stampare
@@ -164,12 +141,8 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
         <div className="pb-info">
           <div>
             <p className="pb-label">Paziente</p>
-            <p className="pb-value">{localPatient.first_name} {localPatient.last_name}</p>
-            <p className="pb-sub">Nato/a il {fmtDate(localPatient.dob)}</p>
-          </div>
-          <div>
-            <p className="pb-label">Medico richiedente</p>
-            <p className="pb-value">{localDoctor}</p>
+            <p className="pb-value">{patient.first_name} {patient.last_name}</p>
+            <p className="pb-sub">Nato/a il {fmtDate(patient.dob)}</p>
           </div>
         </div>
       ),
@@ -256,14 +229,14 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
       el: (
         <div className="pb-sign">
           <div />
-          <div className="pb-sign-line">Firma del medico</div>
+          <div className="pb-sign-line">Firma e timbro del medico prescrittore</div>
         </div>
       ),
     });
 
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localPatient, localDoctor, notes, selectedCodes.join(","), aggregation, ricette, codeField, cfg.groupByCategory]);
+  }, [patient, notes, selectedCodes.join(","), aggregation, ricette, codeField, cfg.groupByCategory]);
 
   // Impagina i blocchi in pagine A4 in base all'altezza misurata
   useLayoutEffect(() => {
@@ -284,17 +257,6 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
     setPages(packed);
   }, [blocks, open]);
 
-  const handleSave = async () => {
-    const result = await onSave({
-      patient: localPatient,
-      doctor_name: localDoctor,
-      notes,
-      letterhead: header,
-    });
-    if (result) setSaved(true);
-    return result;
-  };
-
   const downloadPdf = async () => {
     setPdfBusy(true);
     try {
@@ -302,16 +264,14 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
         <ReportPdfDocument
           reportType={reportType}
           selectedItems={selectedItems}
-          patient={localPatient}
-          doctorName={localDoctor}
+          patient={patient}
           notes={notes}
-          letterhead={header}
           aggregation={aggregation}
           ricette={ricette}
           logoSrc={getReportPdfLogoSrc()}
         />
       ).toBlob();
-      const filename = buildReportPdfFilename({ reportType, patient: localPatient });
+      const filename = buildReportPdfFilename({ reportType, patient });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -324,12 +284,6 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
     } finally {
       setPdfBusy(false);
     }
-  };
-
-  const handleSaveAndDownload = async () => {
-    const result = await handleSave();
-    if (!result) return;
-    await downloadPdf();
   };
 
   return (
@@ -357,10 +311,6 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
                 {editing ? <Check className="h-4 w-4 mr-1.5" /> : <Pencil className="h-4 w-4 mr-1.5" />}
                 {editing ? "Fine modifica" : "Modifica"}
               </Button>
-              <Button size="sm" variant="outline" onClick={handleSave} data-testid="btn-save-report-button">
-                {saved ? <Check className="h-4 w-4 mr-1.5 text-emerald-600" /> : null}
-                {saved ? "Salvato" : "Salva"}
-              </Button>
               <Button
                 size="sm"
                 variant="outline"
@@ -370,16 +320,6 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
               >
                 <Download className="h-4 w-4 mr-1.5" />
                 Scarica PDF
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSaveAndDownload}
-                disabled={pdfBusy}
-                data-testid="btn-save-and-download-pdf"
-              >
-                <Save className="h-4 w-4 mr-1.5" />
-                Salva e scarica PDF
               </Button>
               <Button size="sm" onClick={() => window.print()} data-testid="btn-print-report-button" className="bg-sky-600 hover:bg-sky-700">
                 <Printer className="h-4 w-4 mr-1.5" /> Stampa
@@ -404,25 +344,17 @@ export default function ReportModal({ open, onOpenChange, allergens, selectedCod
               <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Paziente</p>
               {editing ? (
                 <div className="space-y-2 no-print">
-                  <Input value={localPatient.first_name} onChange={(e) => setLocalPatient({ ...localPatient, first_name: e.target.value })} placeholder="Nome" />
-                  <Input value={localPatient.last_name} onChange={(e) => setLocalPatient({ ...localPatient, last_name: e.target.value })} placeholder="Cognome" />
-                  <Input type="date" value={localPatient.dob} onChange={(e) => setLocalPatient({ ...localPatient, dob: e.target.value })} />
+                  <Input value={patient.first_name} onChange={(e) => setPatient({ ...patient, first_name: e.target.value })} placeholder="Nome" />
+                  <Input value={patient.last_name} onChange={(e) => setPatient({ ...patient, last_name: e.target.value })} placeholder="Cognome" />
+                  <Input type="date" value={patient.dob} onChange={(e) => setPatient({ ...patient, dob: e.target.value })} />
                 </div>
               ) : (
                 <>
                   <p className="text-base font-medium text-slate-900">
-                    {localPatient.first_name} {localPatient.last_name}
+                    {patient.first_name} {patient.last_name}
                   </p>
-                  <p className="text-sm text-slate-600">Nato/a il {fmtDate(localPatient.dob)}</p>
+                  <p className="text-sm text-slate-600">Nato/a il {fmtDate(patient.dob)}</p>
                 </>
-              )}
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Medico richiedente</p>
-              {editing ? (
-                <Input value={localDoctor} onChange={(e) => setLocalDoctor(e.target.value)} className="no-print" />
-              ) : (
-                <p className="text-base font-medium text-slate-900">{localDoctor}</p>
               )}
             </div>
           </div>
